@@ -1,9 +1,9 @@
 package domain.Graphs;
 
 import domain.Vehicle;
+import domain.List.EdgeList;
 import domain.List.GraphNodeList;
 import domain.List.StringList;
-import domain.List.EdgeList;
 
 public class Graph {
     private GraphNodeList nodes;
