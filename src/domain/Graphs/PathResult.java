@@ -6,9 +6,32 @@ public class PathResult {
     public final int distance;
     public final StringList path;
     
+    // Properties from DetailedPathResult
+    public StringList camino;
+    public int distanciaTotal;
+    public String detalleAlgoritmo;
+    
+    // Constructor original
     public PathResult(int distance, StringList path) {
         this.distance = distance;
         this.path = path;
+        this.camino = new StringList();
+        this.distanciaTotal = distance;
+        this.detalleAlgoritmo = "";
+        
+        // Convert StringList to StringList
+        for (int i = 0; i < path.getSize(); i++) {
+            this.camino.add(path.get(i));
+        }
+    }
+    
+    // Constructor for detailed results
+    public PathResult() {
+        this.distance = 0;
+        this.path = new StringList();
+        this.camino = new StringList();
+        this.distanciaTotal = 0;
+        this.detalleAlgoritmo = "";
     }
     
     @Override

@@ -1,12 +1,15 @@
 package business;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Date;
+import domain.List.VehicleList;
+import domain.List.StringList;
+import domain.List.RequestQueue;
 
-import domain.Servicio;
-import domain.Solicitud;
+import domain.Service;
+import domain.Request;
 import domain.Utils;
-import domain.Vehiculo;
+import domain.Graphs.Graph;
+import domain.Vehicle;
 import Data.DataManager;
 
 public class RequestController {
@@ -21,81 +24,79 @@ public class RequestController {
 	}
 
 	private void initDatos() {
-		// Vehículos distribuidos en diferentes pueblos
-		utils.vehiculos.agregar(new Vehiculo("V1", "Centro"));
-		utils.vehiculos.agregar(new Vehiculo("V2", "Norte"));
-		utils.vehiculos.agregar(new Vehiculo("V3", "Sur"));
-		utils.vehiculos.agregar(new Vehiculo("V4", "Este"));
-		utils.vehiculos.agregar(new Vehiculo("V5", "Oeste"));
-		utils.vehiculos.agregar(new Vehiculo("V6", "Noroeste"));
-		utils.vehiculos.agregar(new Vehiculo("V7", "Suroeste"));
-
-		// Red en forma de cruz con nodos en esquinas
-		utils.mapa.agregarConexion("Centro", "Norte", 10);
-		utils.mapa.agregarConexion("Centro", "Sur", 12);
-		utils.mapa.agregarConexion("Centro", "Este", 11);
-		utils.mapa.agregarConexion("Centro", "Oeste", 9);
-		
-		// Conexiones en esquinas
-		utils.mapa.agregarConexion("Noroeste", "Norte", 8);
-		utils.mapa.agregarConexion("Noroeste", "Oeste", 7);
-		utils.mapa.agregarConexion("Noroeste", "Centro", 14);
-		
-		utils.mapa.agregarConexion("Suroeste", "Sur", 9);
-		utils.mapa.agregarConexion("Suroeste", "Oeste", 6);
-		utils.mapa.agregarConexion("Suroeste", "Centro", 15);
-		
-		// Conexión entre esquinas
-		utils.mapa.agregarConexion("Noroeste", "Suroeste", 16);
-		
-		// Diagonal
-		utils.mapa.agregarConexion("Norte", "Este", 14);
-
-		utils.tarifas.agregar("basica", 10.0);
-		utils.tarifas.agregar("premium", 15.0);
-		utils.tarifas.agregar("vip", 25.0);
-		
-		// Solicitudes demo
-		utils.agregarSolicitud(new Solicitud("Juan Pérez", "Centro", "Norte", 3));
-		utils.agregarSolicitud(new Solicitud("María García", "Sur", "Este", 4));
-		utils.agregarSolicitud(new Solicitud("Carlos López", "Oeste", "Noroeste", 2));
-		utils.agregarSolicitud(new Solicitud("Ana Martínez", "Norte", "Suroeste", 1));
+		dataManager.cargarDatosIniciales(utils, "datos_iniciales.txt");
 	}
 
-	public Utils.Grafo getMapa() {
+	public Graph getMapa() {
 		return utils.mapa;
 	}
 
-	public Solicitud registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
-		Solicitud solicitud = new Solicitud(cliente, origen, destino, prioridad);
+	public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
+		int numeroRandom = (int)(Math.random() * 1000);
+		String id = "REQ" + numeroRandom;
+		Request solicitud = new Request(id, origen, destino, cliente, prioridad);
 		utils.agregarSolicitud(solicitud);
+		registrarEvento("Solicitud registrada - Cliente: " + cliente + ", " + origen + " -> " + destino + ", Prioridad: " + prioridad);
 		return solicitud;
 	}
 
-	public Servicio procesarSiguienteServicio() {
-		return utils.procesarSiguiente();
+	public Service procesarSiguienteServicio() {
+		Service servicio = utils.procesarSiguiente();
+		if (servicio == null) {
+			registrarEvento("Intento de procesar solicitud - Sin solicitudes pendientes");
+		} else {
+			registrarEvento("Solicitud procesada - Servicio #" + servicio.id + " para " + servicio.request.getClientName());
+		}
+		return servicio;
 	}
 
-	public List<Vehiculo> obtenerVehiculosOrdenadosBurbuja() {
-		List<Vehiculo> vehiculos = utils.vehiculos.obtenerTodos();
-		utils.ordenarBurbuja(vehiculos);
+	public VehicleList obtenerVehiculosOrdenadosBurbuja() {
+		VehicleList vehiculos = new VehicleList();
+		java.util.List<Vehicle> temp = utils.vehiculos.obtenerTodos();
+		utils.ordenarBurbuja(temp);
+		for (Vehicle v : temp) {
+			vehiculos.add(v);
+		}
 		return vehiculos;
 	}
 
-	public List<Vehiculo> obtenerVehiculosOrdenadosQuickSort() {
-		List<Vehiculo> vehiculos = utils.vehiculos.obtenerTodos();
-		if (!vehiculos.isEmpty()) {
-			utils.ordenarRapido(vehiculos, 0, vehiculos.size() - 1);
+	public VehicleList obtenerVehiculosOrdenadosQuickSort() {
+		VehicleList vehiculos = new VehicleList();
+		java.util.List<Vehicle> temp = utils.vehiculos.obtenerTodos();
+		if (!temp.isEmpty()) {
+			utils.ordenarRapido(temp, 0, temp.size() - 1);
+		}
+		for (Vehicle v : temp) {
+			vehiculos.add(v);
 		}
 		return vehiculos;
 	}
 	
 	public String explorarMapaBFS(String inicio) {
-		return utils.mapa.bfs(inicio);
+		String resultado = utils.mapa.bfs(inicio);
+		registrarEvento("Búsqueda BFS ejecutada desde nodo: " + inicio);
+		return resultado;
 	}
 	
-	public List<String> obtenerNodosDisponibles() {
-		List<String> nodos = new ArrayList<>();
+	public class RequestQueuesData {
+		public RequestQueue solicitudesUrgentes;
+		public RequestQueue solicitudesNormales;
+		
+		public RequestQueuesData(RequestQueue urgentes, RequestQueue normales) {
+			this.solicitudesUrgentes = urgentes;
+			this.solicitudesNormales = normales;
+		}
+	}
+	
+	public RequestQueuesData obtenerColasReporte() {
+		return new RequestQueuesData(
+			utils.colaUrgente.getAll(),
+			utils.colaNormal
+		);
+	}
+	
+	public StringList obtenerNodosDisponibles() {
+		StringList nodos = new StringList();
 		var mapa = utils.mapa.obtenerMapaAristas();
 		for (String nodo : mapa.keySet()) {
 			nodos.add(nodo);
@@ -105,9 +106,24 @@ public class RequestController {
 	
 	public void guardarDatos() {
 		dataManager.guardarTodo(utils);
+		dataManager.guardarHistorial(obtenerHistorial(), "historial.txt");
 	}
 	
 	public void cargarDatos() {
 		dataManager.cargarTodo(utils);
+	}
+	
+	public StringList obtenerHistorial() {
+		StringList result = new StringList();
+		for (String evento : utils.historialEventos.getAll()) {
+			result.add(evento);
+		}
+		return result;
+	}
+	
+	public void registrarEvento(String evento) {
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String timestamp = sdf.format(new Date());
+		utils.historialEventos.add("[" + timestamp + "] " + evento);
 	}
 }

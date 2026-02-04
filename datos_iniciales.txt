@@ -1,0 +1,30 @@
+=== VEHÍCULOS ===
+V1,Driver1,Centro,sedan
+V2,Driver2,Norte,sedan
+V3,Driver3,Sur,suv
+V4,Driver4,Este,sedan
+V5,Driver5,Oeste,van
+V6,Driver6,Noroeste,sedan
+V7,Driver7,Suroeste,suv
+
+=== MAPA (ARISTAS) ===
+Centro,Norte,10
+Centro,Sur,12
+Centro,Este,11
+Centro,Oeste,9
+Noroeste,Norte,8
+Noroeste,Oeste,7
+Noroeste,Centro,14
+Suroeste,Sur,9
+Suroeste,Oeste,6
+Suroeste,Centro,15
+Noroeste,Suroeste,16
+Norte,Este,14
+
+=== TARIFAS ===
+basica,10.0
+premium,15.0
+vip,25.0
+
+=== SOLICITUDES INICIALES ===
+REQ004,Ana Martínez,Norte,Suroeste,1

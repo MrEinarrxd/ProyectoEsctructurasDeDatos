@@ -3,18 +3,22 @@ package presentation;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.*;
 
-import domain.Utils;
+import domain.Graphs.Edge;
+import domain.Graphs.Graph;
 
 public class GraphPanel extends JPanel {
-    private Utils.Grafo grafo;
+    private Graph grafo;
     private Map<String, Point> posiciones;
 
-    public GraphPanel(Utils.Grafo grafo) {
+    public GraphPanel(Graph grafo) {
         this.grafo = grafo;
-        this.posiciones = new java.util.HashMap<>();
+        this.posiciones = new HashMap<>();
         calcularPosiciones();
         setPreferredSize(new Dimension(900, 600));
     }
@@ -44,26 +48,26 @@ public class GraphPanel extends JPanel {
                            RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2d.setColor(Color.GRAY);
-        Map<String, List<Utils.Grafo.Arista>> mapa = grafo.obtenerMapaAristas();
-        java.util.Set<String> aristasDibujadas = new java.util.HashSet<>();
-        java.util.Map<String, Integer> distancias = new java.util.HashMap<>();
+        Map<String, List<Edge>> mapa = grafo.obtenerMapaAristas();
+        Set<String> aristasDibujadas = new HashSet<>();
+        Map<String, Integer> distancias = new HashMap<>();
 
         for (String origen : mapa.keySet()) {
             Point p1 = posiciones.get(origen);
             if (p1 == null) continue;
 
-            for (Utils.Grafo.Arista arista : mapa.get(origen)) {
-                Point p2 = posiciones.get(arista.destino);
+            for (Edge arista : mapa.get(origen)) {
+                Point p2 = posiciones.get(arista.getTo());
                 if (p2 == null) continue;
 
                 // Evitar dibujar aristas duplicadas (bidireccionales)
-                String clave = origen.compareTo(arista.destino) < 0 
-                    ? origen + "||" + arista.destino 
-                    : arista.destino + "||" + origen;
+                String clave = origen.compareTo(arista.getTo()) < 0 
+                    ? origen + "||" + arista.getTo() 
+                    : arista.getTo() + "||" + origen;
                 
                 if (aristasDibujadas.contains(clave)) continue;
                 aristasDibujadas.add(clave);
-                distancias.put(clave, arista.distancia);
+                distancias.put(clave, arista.getWeight());
 
                 g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
             }

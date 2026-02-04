@@ -1,20 +1,21 @@
 package domain.List;
 
 import domain.Vehicle;
+import java.util.ArrayList;
+import java.util.List;
 
-public class List {
+public class VehicleListGraph {
     private NodeVehicle head;
     private int size;
     
-    public List() {
+    public VehicleListGraph() {
         this.head = null;
         this.size = 0;
     }
     
     public void add(Vehicle vehicle) {
         NodeVehicle newNode = new NodeVehicle(vehicle);
-        
-        if (isEmpty()) {
+        if (head == null) {
             head = newNode;
         } else {
             NodeVehicle current = head;
@@ -26,37 +27,6 @@ public class List {
         size++;
     }
     
-    public void addFirst(Vehicle vehicle) {
-        NodeVehicle newNode = new NodeVehicle(vehicle);
-        newNode.setNext(head);
-        head = newNode;
-        size++;
-    }
-    
-    public boolean remove(Vehicle vehicle) {
-        if (isEmpty()) {
-            return false;
-        }
-        
-        if (head.getData().equals(vehicle)) {
-            head = head.getNext();
-            size--;
-            return true;
-        }
-        
-        NodeVehicle current = head;
-        while (current.getNext() != null) {
-            if (current.getNext().getData().equals(vehicle)) {
-                current.setNext(current.getNext().getNext());
-                size--;
-                return true;
-            }
-            current = current.getNext();
-        }
-        
-        return false;
-    }
-    
     public Vehicle get(int index) {
         if (index < 0 || index >= size) {
             return null;
@@ -66,7 +36,6 @@ public class List {
         for (int i = 0; i < index; i++) {
             current = current.getNext();
         }
-        
         return current.getData();
     }
     
@@ -81,37 +50,36 @@ public class List {
         return false;
     }
     
-    public boolean isEmpty() {
-        return head == null;
-    }
-    
     public int getSize() {
         return size;
     }
     
-    public void clear() {
-        head = null;
-        size = 0;
+    public boolean isEmpty() {
+        return size == 0;
     }
     
+    public List<Vehicle> obtenerTodos() {
+        List<Vehicle> lista = new ArrayList<>();
+        NodeVehicle current = head;
+        while (current != null) {
+            lista.add(current.getData());
+            current = current.getNext();
+        }
+        return lista;
+    }
+
     @Override
     public String toString() {
         if (isEmpty()) {
-            return "List: []";
+            return "Lista vacia";
         }
         
-        StringBuilder sb = new StringBuilder("List: [");
+        StringBuilder sb = new StringBuilder();
         NodeVehicle current = head;
-        
         while (current != null) {
-            sb.append(current.getData());
-            if (current.getNext() != null) {
-                sb.append(", ");
-            }
+            sb.append(current.getData().toString()).append("\n");
             current = current.getNext();
         }
-        
-        sb.append("]");
         return sb.toString();
     }
 }

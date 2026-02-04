@@ -1,0 +1,2 @@
+1,REQ004,V2,Norte->Suroeste,210.0
+2,REQ170,V7,Suroeste->Oeste,60.0

@@ -1,6 +1,8 @@
 package domain.List;
 
 import domain.Vehicle;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VehicleList {
     private NodeVehicle head;
@@ -11,8 +13,8 @@ public class VehicleList {
         this.size = 0;
     }
     
-    public void add(Vehicle vehicle) {
-        NodeVehicle newNode = new NodeVehicle(vehicle);
+    public void add(Vehicle vehiculo) {
+        NodeVehicle newNode = new NodeVehicle(vehiculo);
         if (head == null) {
             head = newNode;
         } else {
@@ -23,6 +25,10 @@ public class VehicleList {
             current.setNext(newNode);
         }
         size++;
+    }
+    
+    public void agregar(Vehicle vehiculo) {
+        add(vehiculo);
     }
     
     public Vehicle get(int index) {
@@ -37,10 +43,10 @@ public class VehicleList {
         return current.getData();
     }
     
-    public boolean contains(Vehicle vehicle) {
+    public boolean contains(Vehicle vehiculo) {
         NodeVehicle current = head;
         while (current != null) {
-            if (current.getData().equals(vehicle)) {
+            if (current.getData().equals(vehiculo)) {
                 return true;
             }
             current = current.getNext();
@@ -56,6 +62,28 @@ public class VehicleList {
         return size == 0;
     }
     
+    public List<Vehicle> obtenerTodos() {
+        List<Vehicle> lista = new ArrayList<>();
+        NodeVehicle current = head;
+        while (current != null) {
+            lista.add(current.getData());
+            current = current.getNext();
+        }
+        return lista;
+    }
+    
+    public Vehicle buscarDisponible(String zona) {
+        NodeVehicle current = head;
+        while (current != null) {
+            Vehicle v = current.getData();
+            if (v.isAvailable() && v.getCurrentZone().equals(zona)) {
+                return v;
+            }
+            current = current.getNext();
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         if (isEmpty()) {

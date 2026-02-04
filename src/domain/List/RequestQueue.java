@@ -1,13 +1,15 @@
 package domain.List;
 
+import java.util.List;
+import java.util.ArrayList;
 import domain.Request;
 
-public class Queue {
+public class RequestQueue {
     private NodeRequest front;
     private NodeRequest rear;
     private int size;
     
-    public Queue() {
+    public RequestQueue() {
         this.front = null;
         this.rear = null;
         this.size = 0;
@@ -53,8 +55,22 @@ public class Queue {
         return front == null;
     }
     
+    public int size() {
+        return size;
+    }
+    
     public int getSize() {
         return size;
+    }
+    
+    public List<Request> getAll() {
+        List<Request> list = new ArrayList<>();
+        NodeRequest current = front;
+        while (current != null) {
+            list.add(current.getData());
+            current = current.getNext();
+        }
+        return list;
     }
     
     public void clear() {
