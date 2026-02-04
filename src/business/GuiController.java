@@ -21,6 +21,10 @@ public class GuiController {
     public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
         return requestController.registrarSolicitud(cliente, origen, destino, prioridad);
     }
+    
+    public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad, int categoria) {
+        return requestController.registrarSolicitud(cliente, origen, destino, prioridad, categoria);
+    }
 
     public Service procesarSiguienteServicio() {
         return requestController.procesarSiguienteServicio();
@@ -39,9 +43,9 @@ public class GuiController {
         domain.List.RequestQueue colaNormal = requestController.obtenerColaNormal();
         StringBuilder resultado = new StringBuilder();
 
-        resultado.append("=== COLA DE SERVICIOS ===\n\n");
+        resultado.append("=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n");
 
-        resultado.append("[URGENTE] COLA URGENTE (Prioridad >= 3):\n");
+        resultado.append("[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n");
         resultado.append("Tamaño: ").append(colaUrgente.getSize()).append("\n");
         if (colaUrgente.isEmpty()) {
             resultado.append("  [Vacía]\n");
@@ -52,25 +56,26 @@ public class GuiController {
                 resultado.append("ID: ").append(req.getId());
                 resultado.append(" | Cliente: ").append(req.getClientName());
                 resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Prioridad: ").append(req.getPriority());
+                resultado.append(" | Categoría: Emergencia");
                 resultado.append("\n");
             }
         }
 
         resultado.append("\n");
 
-        resultado.append("[NORMAL] COLA NORMAL (Prioridad < 3):\n");
+        resultado.append("[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n");
         resultado.append("Tamaño: ").append(colaNormal.getSize()).append("\n");
         if (colaNormal.isEmpty()) {
             resultado.append("  [Vacía]\n");
         } else {
             int index = 1;
             for (Request req : colaNormal.getAll()) {
+                String categoria = obtenerNombreCategoria(req.getClientCategory());
                 resultado.append("  ").append(index++).append(". ");
                 resultado.append("ID: ").append(req.getId());
                 resultado.append(" | Cliente: ").append(req.getClientName());
                 resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Prioridad: ").append(req.getPriority());
+                resultado.append(" | Categoría: ").append(categoria);
                 resultado.append("\n");
             }
         }
@@ -88,6 +93,16 @@ public class GuiController {
     
     public StringList obtenerNodosDisponibles() {
         return requestController.obtenerNodosDisponibles();
+    }
+    
+    private String obtenerNombreCategoria(int categoria) {
+        switch(categoria) {
+            case 0: return "Económico";
+            case 1: return "Regular";
+            case 2: return "VIP";
+            case 3: return "Emergencia";
+            default: return "Desconocido";
+        }
     }
     
     public void guardarDatos() {

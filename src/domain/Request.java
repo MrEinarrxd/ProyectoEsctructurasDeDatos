@@ -7,20 +7,25 @@ public class Request {
     private String origin;
     private String destination;
     private String clientName;
-    private int priority;
+    private int clientCategory; // 0=económico, 1=regular, 2=VIP, 3=emergencia
     private String status;
     private LocalDateTime timestamp;
     private String assignedVehicleId;
     
-    public Request(String id, String origin, String destination, String clientName, int priority) {
+    public Request(String id, String origin, String destination, String clientName, int clientCategory) {
         this.id = id;
         this.origin = origin;
         this.destination = destination;
         this.clientName = clientName;
-        this.priority = priority;
+        this.clientCategory = clientCategory;
         this.status = "PENDING";
         this.timestamp = LocalDateTime.now();
         this.assignedVehicleId = null;
+    }
+
+    // Constructor compatible con versiones anteriores
+    public Request(String id, String origin, String destination, String clientName, int priority, int clientCategory) {
+        this(id, origin, destination, clientName, clientCategory);
     }
     
     public String getId() {
@@ -50,17 +55,17 @@ public class Request {
     public String getClientName() {
         return clientName;
     }
-    
+
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
     
-    public int getPriority() {
-        return priority;
+    public int getClientCategory() {
+        return clientCategory;
     }
     
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public void setClientCategory(int clientCategory) {
+        this.clientCategory = clientCategory;
     }
     
     public String getStatus() {
@@ -107,7 +112,7 @@ public class Request {
                 ", client='" + clientName + '\'' +
                 ", from='" + origin + '\'' +
                 ", to='" + destination + '\'' +
-                ", priority=" + priority +
+                ", category=" + clientCategory +
                 ", status='" + status + '\'' +
                 ", vehicle='" + (assignedVehicleId != null ? assignedVehicleId : "none") + '\'' +
                 '}';

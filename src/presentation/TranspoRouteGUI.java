@@ -67,8 +67,9 @@ public class TranspoRouteGUI extends JFrame {
         JTextField clienteField = new JTextField();
         JComboBox<String> origenCombo = new JComboBox<>();
         JComboBox<String> destinoCombo = new JComboBox<>();
-        JComboBox<String> prioridadCombo = new JComboBox<>(new String[] {
-                "1 - Baja", "2 - Media", "3 - Alta", "4 - Emergencia" });
+        JComboBox<String> categoriaCombo = new JComboBox<>(new String[] {
+                "0 - Económico", "1 - Regular", "2 - VIP", "3 - Emergencia" });
+        categoriaCombo.setSelectedIndex(1); // Por defecto Regular
 
         JButton registrarBtn = new JButton("Registrar Solicitud");
         registrarBtn.setPreferredSize(new Dimension(180, 35));
@@ -87,8 +88,8 @@ public class TranspoRouteGUI extends JFrame {
         panel.add(origenCombo);
         panel.add(new JLabel("Destino:"));
         panel.add(destinoCombo);
-        panel.add(new JLabel("Prioridad:"));
-        panel.add(prioridadCombo);
+        panel.add(new JLabel("Categoría Cliente:"));
+        panel.add(categoriaCombo);
         panel.add(new JLabel(""));
         panel.add(registrarBtn);
 
@@ -96,7 +97,8 @@ public class TranspoRouteGUI extends JFrame {
             String cliente = clienteField.getText();
             String origen = (String) origenCombo.getSelectedItem();
             String destino = (String) destinoCombo.getSelectedItem();
-            int prioridad = prioridadCombo.getSelectedIndex() + 1;
+            int categoria = categoriaCombo.getSelectedIndex(); // 0, 1, 2, 3
+            int prioridad = categoria; // La prioridad es igual a la categoría
 
             if (cliente.isEmpty() || origen == null || destino == null) {
                 return;
@@ -106,8 +108,9 @@ public class TranspoRouteGUI extends JFrame {
                 return;
             }
 
-            controller.registrarSolicitud(cliente, origen, destino, prioridad);
-            agregarAlHistorial("Solicitud registrada - Cliente: " + cliente + ", " + origen + " -> " + destino + ", Prioridad: " + prioridad);
+            controller.registrarSolicitud(cliente, origen, destino, prioridad, categoria);
+            String categoriaNombre = categoriaCombo.getSelectedItem().toString();
+            agregarAlHistorial("Solicitud registrada - Cliente: " + cliente + " (" + categoriaNombre + "), " + origen + " -> " + destino);
 
             clienteField.setText("");
         });
@@ -163,7 +166,9 @@ public class TranspoRouteGUI extends JFrame {
                     resultadoArea.append(servicio.algorithmDetail);
                 }
 
-                agregarAlHistorial("Solicitud procesada - Servicio #" + servicio.id + " para " + servicio.request.getClientName());
+                // Guardar en historial con la ruta simplificada
+                String rutaSimplificada = rutaCliente.equals("No disponible") ? "No disponible" : rutaCliente;
+                agregarAlHistorial("Solicitud procesada - Servicio #" + servicio.id + " para " + servicio.request.getClientName() + " | Ruta: " + rutaSimplificada);
 
                 // Posicionar el scroll al inicio
                 resultadoArea.setCaretPosition(0);
@@ -251,10 +256,25 @@ public class TranspoRouteGUI extends JFrame {
         } else {
             for (int i = 0; i < servicios.getSize(); i++) {
                 Service servicio = servicios.get(i);
-                reporteArea.append("#" + servicio.id + " | Cliente: " + servicio.request.getClientName());
-                reporteArea.append(" | Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination());
-                reporteArea.append(" | Vehículo: " + servicio.vehicle.getId());
-                reporteArea.append(" | Costo: $" + servicio.cost + "\n");
+                reporteArea.append("\n────────────────────────────────────────\n");
+                reporteArea.append("SERVICIO #" + servicio.id + "\n");
+                reporteArea.append("────────────────────────────────────────\n");
+                reporteArea.append("Cliente: " + servicio.request.getClientName() + "\n");
+                reporteArea.append("Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination() + "\n");
+                reporteArea.append("Vehículo: " + servicio.vehicle.getId() + "\n");
+                reporteArea.append("Costo: $" + servicio.cost + "\n\n");
+                
+                reporteArea.append("RUTA DEL VEHÍCULO AL CLIENTE:\n");
+                String rutaVehiculo = servicio.vehicleToClientRoute != null && !servicio.vehicleToClientRoute.isEmpty() 
+                    ? servicio.vehicleToClientRoute 
+                    : "Vehículo ya en ubicación";
+                reporteArea.append(rutaVehiculo + "\n\n");
+                
+                reporteArea.append("RUTA DEL CLIENTE AL DESTINO:\n");
+                String rutaCliente = servicio.clientToDestinationRoute != null && !servicio.clientToDestinationRoute.isEmpty() 
+                    ? servicio.clientToDestinationRoute 
+                    : "No disponible";
+                reporteArea.append(rutaCliente + "\n");
             }
         }
 

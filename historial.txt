@@ -1,1 +1,6 @@
-NORMAL: Ana Martínez de Norte a Suroeste
+[2026-02-04 11:58:24] Solicitud procesada - Servicio #2 para Ana Martínez
+SERVICIO #2 creado: $210.0
+[2026-02-04 11:58:16] Solicitud procesada - Servicio #1 para Jose Alonso
+SERVICIO #1 creado: $130.0
+VIP: Jose Alonso de Suroeste a Noroeste
+ECONÓMICO: Ana Martínez de Norte a Suroeste

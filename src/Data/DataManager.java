@@ -10,6 +10,16 @@ import domain.List.StringList;
 
 public class DataManager {
     
+    private String obtenerNombreCategoria(int categoria) {
+        switch(categoria) {
+            case 0: return "Económico";
+            case 1: return "Regular";
+            case 2: return "VIP";
+            case 3: return "Emergencia";
+            default: return "Desconocido";
+        }
+    }
+    
     // Guardar vehículos
     public void guardarVehiculos(VehicleList vehiculos, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
@@ -50,7 +60,7 @@ public class DataManager {
     public void guardarSolicitudes(domain.List.RequestQueue solicitudes, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             for (Request s : solicitudes.getAll()) {
-                writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getPriority());
+                writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
             }
         } catch (IOException e) {
             System.out.println("Error guardando solicitudes: " + e.getMessage());
@@ -202,14 +212,15 @@ public class DataManager {
                         String cliente = partes[1].trim();
                         String origen = partes[2].trim();
                         String destino = partes[3].trim();
-                        int prioridad = Integer.parseInt(partes[4].trim());
-                        Request solicitud = new Request(id, origen, destino, cliente, prioridad);
-                        if (solicitud.getPriority() >= 3) {
-                            utils.colaUrgente.enqueue(solicitud, solicitud.getPriority());
-                            utils.historialEventos.push("URGENTE: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                        int categoria = Integer.parseInt(partes[4].trim());
+                        Request solicitud = new Request(id, origen, destino, cliente, categoria);
+                        if (solicitud.getClientCategory() == 3) {
+                            utils.colaUrgente.enqueue(solicitud, 4);
+                            utils.historialEventos.push("EMERGENCIA: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
                         } else {
                             utils.colaNormal.enqueue(solicitud);
-                            utils.historialEventos.push("NORMAL: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                            String categoriaNombre = obtenerNombreCategoria(categoria);
+                            utils.historialEventos.push(categoriaNombre.toUpperCase() + ": " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
                         }
                     }
                 }

@@ -34,11 +34,16 @@ public class RequestController {
 	}
 
 	public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
+		return registrarSolicitud(cliente, origen, destino, prioridad, 1); // Por defecto regular
+	}
+
+	public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad, int clientCategory) {
 		int numeroRandom = (int)(Math.random() * 1000);
 		String id = "REQ" + numeroRandom;
-		Request solicitud = new Request(id, origen, destino, cliente, prioridad);
+		Request solicitud = new Request(id, origen, destino, cliente, clientCategory);
 		agregarSolicitud(solicitud);
-		registrarEvento("Solicitud registrada - Cliente: " + cliente + ", " + origen + " -> " + destino + ", Prioridad: " + prioridad);
+		String categoria = obtenerNombreCategoria(clientCategory);
+		registrarEvento("Solicitud registrada - Cliente: " + cliente + " (" + categoria + "), " + origen + " -> " + destino);
 		return solicitud;
 	}
 
@@ -119,20 +124,45 @@ public class RequestController {
 	}
 
 	// ====== Métodos del controller ======
+	private String obtenerNombreCategoria(int categoria) {
+		switch(categoria) {
+			case 0: return "Económico";
+			case 1: return "Regular";
+			case 2: return "VIP";
+			case 3: return "Emergencia";
+			default: return "Desconocido";
+		}
+	}
+
 	private void agregarSolicitud(Request s) {
-		if (s.getPriority() >= 3) {
-			utils.colaUrgente.enqueue(s, s.getPriority());
-			utils.historialEventos.push("URGENTE: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
+		// Procesar por categoría de cliente (mayor categoría = mayor prioridad en procesamiento)
+		// 3=Emergencia, 2=VIP, 1=Regular, 0=Económico
+		if (s.getClientCategory() == 3) {
+			// Emergencia va a cola urgente
+			utils.colaUrgente.enqueue(s, 4);
+			utils.historialEventos.push("EMERGENCIA: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
 		} else {
+			// Todas las demás (VIP, Regular, Económico) van a cola normal, ordenadas por categoría
 			utils.colaNormal.enqueue(s);
-			utils.historialEventos.push("NORMAL: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
+			String categoria = obtenerNombreCategoria(s.getClientCategory());
+			utils.historialEventos.push(categoria.toUpperCase() + ": " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
 		}
 	}
 
 	private Service procesarSiguiente() {
+		// Primero buscar si hay emergencias
 		Request solicitud = utils.colaUrgente.dequeue();
+		
+		// Si no hay emergencias, buscar en la cola normal por categoría de tarifa
+		// Orden: VIP (2) > Regular (1) > Económico (0)
 		if (solicitud == null) {
-			solicitud = utils.colaNormal.dequeue();
+			solicitud = buscarSolicitudPorCategoria(2); // VIP
+		}
+		if (solicitud == null) {
+			solicitud = buscarSolicitudPorCategoria(1); // Regular
+		}
+		if (solicitud == null) {
+			solicitud = buscarSolicitudPorCategoria(0); // Económico
 		}
 
 		if (solicitud == null) {
@@ -188,6 +218,33 @@ public class RequestController {
 			ordenarRapido(lista, inicio, pivote - 1);
 			ordenarRapido(lista, pivote + 1, fin);
 		}
+	}
+
+	// Buscar la primera solicitud de una categoría específica en la cola normal
+	private Request buscarSolicitudPorCategoria(int categoria) {
+		domain.List.RequestQueue colaNormal = utils.colaNormal;
+		domain.List.RequestQueue temp = new domain.List.RequestQueue();
+		Request encontrada = null;
+
+		// Desencolar todos para buscar
+		while (true) {
+			Request req = colaNormal.dequeue();
+			if (req == null) break;
+			
+			if (encontrada == null && req.getClientCategory() == categoria) {
+				encontrada = req; // Encontramos la primera de esta categoría
+			} else {
+				temp.enqueue(req); // Guardar para devolver a la cola
+			}
+		}
+
+		// Devolver solicitudes a la cola
+		domain.List.RequestQueue tempAll = temp;
+		for (Request req : tempAll.getAll()) {
+			colaNormal.enqueue(req);
+		}
+
+		return encontrada;
 	}
 
 	private int particionar(Vehicle[] lista, int inicio, int fin) {

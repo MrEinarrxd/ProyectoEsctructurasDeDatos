@@ -27,4 +27,5 @@ premium,15.0
 vip,25.0
 
 === SOLICITUDES INICIALES ===
-REQ004,Ana Martínez,Norte,Suroeste,1
+REQ004,Ana Martínez,Norte,Suroeste,1,0
+REQ018,Jose Alonso, Suroeste, Noroeste,3,2

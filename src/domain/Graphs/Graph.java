@@ -264,8 +264,10 @@ public class Graph {
             return resultado;
         }
 
-        detalle.append("=== ALGORITMO DIJKSTRA ===\n");
-        detalle.append("Inicio: ").append(inicio).append(", Destino: ").append(fin).append("\n\n");
+        detalle.append("═══════════════════════════════════════\n");
+        detalle.append("     ALGORITMO DIJKSTRA - BÚSQUEDA DE RUTA ÓPTIMA\n");
+        detalle.append("═══════════════════════════════════════\n\n");
+        detalle.append("Origen: ").append(inicio).append("  →  Destino: ").append(fin).append("\n\n");
 
         int total = nodes.getSize();
         int[] distancia = new int[total];
@@ -281,11 +283,15 @@ public class Graph {
         int inicioIndex = getNodeIndex(inicio);
         distancia[inicioIndex] = 0;
 
-        detalle.append("1. Inicialización:\n");
-        detalle.append("   - Distancia[").append(inicio).append("] = 0\n");
-        detalle.append("   - Todos los demás nodos = INFINITO\n\n");
+        detalle.append("PASO 1: Inicializar\n");
+        detalle.append("────────────────────\n");
+        detalle.append("  • Distancia[").append(inicio).append("] = 0\n");
+        detalle.append("  • Resto de nodos = ∞\n\n");
 
-        int paso = 2;
+        detalle.append("PASO 2: Procesar nodos\n");
+        detalle.append("────────────────────\n");
+        
+        int paso = 1;
         for (int count = 0; count < total; count++) {
             int minDist = Integer.MAX_VALUE;
             int minIndex = -1;
@@ -302,11 +308,11 @@ public class Graph {
             String nodoActual = getNode(minIndex).getName();
             visitado[minIndex] = true;
 
-            detalle.append(paso++).append(". Procesando nodo '").append(nodoActual)
-                   .append("' (distancia: ").append(distancia[minIndex]).append(")\n");
+            detalle.append("  ").append(paso++).append(". Nodo: ").append(nodoActual)
+                   .append(" (distancia: ").append(distancia[minIndex]).append(")\n");
 
             if (nodoActual.equals(fin)) {
-                detalle.append("   ¡Destino alcanzado!\n\n");
+                detalle.append("     DESTINO ALCANZADO!\n\n");
                 break;
             }
 
@@ -323,23 +329,15 @@ public class Graph {
                 int nuevaDist = distancia[minIndex] + edge.getWeight();
                 int distActual = distancia[vecinoIndex];
 
-                detalle.append("   - Vecino '").append(vecino)
-                       .append("': distancia actual=")
-                       .append(distActual == Integer.MAX_VALUE ? "INF" : distActual)
-                       .append(", nueva=").append(nuevaDist);
-
                 if (nuevaDist < distActual) {
                     distancia[vecinoIndex] = nuevaDist;
                     previos[vecinoIndex] = nodoActual;
-                    detalle.append(" ACTUALIZADO\n");
-                } else {
-                    detalle.append(" - no mejora\n");
                 }
             }
-            detalle.append("\n");
         }
 
-        detalle.append("Reconstruyendo camino óptimo:\n");
+        detalle.append("\nPASO 3: Reconstruir ruta\n");
+        detalle.append("────────────────────\n");
         int finIndex = getNodeIndex(fin);
         if (finIndex >= 0 && distancia[finIndex] != Integer.MAX_VALUE) {
             StringList camino = new StringList();
@@ -352,14 +350,16 @@ public class Graph {
             resultado.camino = camino;
             resultado.distanciaTotal = distancia[finIndex];
 
-            detalle.append("Camino: ");
+            detalle.append("  Ruta óptima: ");
             for (int i = 0; i < camino.getSize(); i++) {
                 detalle.append(camino.get(i));
                 if (i < camino.getSize() - 1) detalle.append(" → ");
             }
-            detalle.append("\nDistancia total: ").append(resultado.distanciaTotal).append("\n");
+            detalle.append("\n  Distancia total: ").append(resultado.distanciaTotal).append(" unidades\n");
+            detalle.append("\n═══════════════════════════════════════\n");
         } else {
-            detalle.append("No se encontró un camino válido\n");
+            detalle.append("  No se encontró un camino válido\n");
+            detalle.append("═══════════════════════════════════════\n");
         }
 
         resultado.detalleAlgoritmo = detalle.toString();
