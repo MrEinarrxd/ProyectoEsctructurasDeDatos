@@ -18,7 +18,6 @@ import javax.swing.JTextField;
 
 import business.GuiController;
 import domain.Service;
-import domain.Vehicle;
 
 public class TranspoRouteGUI extends JFrame {
     private final GuiController controller;
