@@ -54,7 +54,7 @@ public class TranspoRouteGUI extends JFrame {
 
         tabbedPane.addTab("Reportes", crearPanelReportes());
         tabbedPane.addTab("Historial", crearPanelHistorial());
-        tabbedPane.addTab("Persistencia", crearPanelPersistencia());
+        tabbedPane.addTab("Guardado", crearPanelPersistencia());
 
         setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
@@ -196,23 +196,16 @@ public class TranspoRouteGUI extends JFrame {
 
         JPanel buttonPanel = new JPanel();
 
-        // Mostrar tarifas por defecto al iniciar
-        mostrarTarifasPorDefecto();
-
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(historialArea), BorderLayout.CENTER);
+
+        inicializarHistorial();
 
         return panel;
     }
 
-    private void mostrarTarifasPorDefecto() {
+    private void inicializarHistorial() {
         historialArea.setText("");
-        historialArea.append("=== ÁRBOL DE TARIFAS ===\n\n");
-        historialArea.append("Estructura de precios del sistema:\n");
-        historialArea.append("  • Tarifa Básica: $10.00 por unidad de distancia\n");
-        historialArea.append("  • Tarifa Premium: $15.00 por unidad de distancia\n");
-        historialArea.append("  • Tarifa VIP: $25.00 por unidad de distancia\n\n");
-        historialArea.append("═══════════════════════════════════════\n");
         historialArea.append("HISTORIAL DE ACCIONES DEL SISTEMA\n");
         historialArea.append("═══════════════════════════════════════\n\n");
     }
@@ -232,8 +225,14 @@ public class TranspoRouteGUI extends JFrame {
             return;
         }
 
+        reporteArea.setText("=== ÁRBOL DE TARIFAS ===\n\n");
+        reporteArea.append("Estructura de precios del sistema:\n");
+        reporteArea.append("  • Tarifa Básica: $10.00 por unidad de distancia\n");
+        reporteArea.append("  • Tarifa Premium: $15.00 por unidad de distancia\n");
+        reporteArea.append("  • Tarifa VIP: $25.00 por unidad de distancia\n\n");
+
         VehicleList vehiculos = controller.obtenerVehiculosOrdenadosQuickSort();
-        reporteArea.setText("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");
+        reporteArea.append("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");
         for (int i = 0; i < vehiculos.getSize(); i++) {
             reporteArea.append(vehiculos.get(i) + "\n");
         }
@@ -310,7 +309,7 @@ public class TranspoRouteGUI extends JFrame {
 
         JTextArea infoArea = new JTextArea(20, 60);
         infoArea.setEditable(false);
-        infoArea.setText("SISTEMA DE PERSISTENCIA\n\n");
+        infoArea.setText("SISTEMA DE GUARDADO\n\n");
         infoArea.append("DATOS DEL SISTEMA:\n");
         infoArea.append("  • Vehículos y su estado\n");
         infoArea.append("  • Servicios realizados\n\n");

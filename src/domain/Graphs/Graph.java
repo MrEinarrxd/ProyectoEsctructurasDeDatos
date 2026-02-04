@@ -331,7 +331,7 @@ public class Graph {
                 if (nuevaDist < distActual) {
                     distancia[vecinoIndex] = nuevaDist;
                     previos[vecinoIndex] = nodoActual;
-                    detalle.append(" ✓ ACTUALIZADO\n");
+                    detalle.append(" ACTUALIZADO\n");
                 } else {
                     detalle.append(" - no mejora\n");
                 }
