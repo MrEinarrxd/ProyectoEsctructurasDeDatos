@@ -41,10 +41,16 @@ public class TranspoRouteGUI extends JFrame {
         tabbedPane.addTab("Procesar", crearPanelProcesar());
 
         graphPanel = new GraphPanel(controller.getMapa());
-        tabbedPane.addTab("Mapa", graphPanel);
+        JScrollPane mapScroll = new JScrollPane(graphPanel, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        tabbedPane.addTab("Mapa", mapScroll);
+        
+        tabbedPane.addTab("Exploración BFS", crearPanelBFS());
 
         tabbedPane.addTab("Reportes", crearPanelReportes());
         tabbedPane.addTab("Historial", crearPanelHistorial());
+        tabbedPane.addTab("Persistencia", crearPanelPersistencia());
 
         logArea = new JTextArea(10, 60);
         logArea.setEditable(false);
@@ -59,19 +65,26 @@ public class TranspoRouteGUI extends JFrame {
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
 
         JTextField clienteField = new JTextField();
-        JTextField origenField = new JTextField();
-        JTextField destinoField = new JTextField();
+        JComboBox<String> origenCombo = new JComboBox<>();
+        JComboBox<String> destinoCombo = new JComboBox<>();
         JComboBox<String> prioridadCombo = new JComboBox<>(new String[] {
                 "1 - Baja", "2 - Media", "3 - Alta", "4 - Emergencia" });
 
         JButton registrarBtn = new JButton("Registrar Solicitud");
 
+        // Cargar nodos disponibles en los combos
+        List<String> nodos = controller.obtenerNodosDisponibles();
+        for (String nodo : nodos) {
+            origenCombo.addItem(nodo);
+            destinoCombo.addItem(nodo);
+        }
+
         panel.add(new JLabel("Cliente:"));
         panel.add(clienteField);
         panel.add(new JLabel("Origen:"));
-        panel.add(origenField);
+        panel.add(origenCombo);
         panel.add(new JLabel("Destino:"));
-        panel.add(destinoField);
+        panel.add(destinoCombo);
         panel.add(new JLabel("Prioridad:"));
         panel.add(prioridadCombo);
         panel.add(new JLabel(""));
@@ -79,21 +92,24 @@ public class TranspoRouteGUI extends JFrame {
 
         registrarBtn.addActionListener(e -> {
             String cliente = clienteField.getText();
-            String origen = origenField.getText();
-            String destino = destinoField.getText();
+            String origen = (String) origenCombo.getSelectedItem();
+            String destino = (String) destinoCombo.getSelectedItem();
             int prioridad = prioridadCombo.getSelectedIndex() + 1;
 
-            if (cliente.isEmpty() || origen.isEmpty() || destino.isEmpty()) {
+            if (cliente.isEmpty() || origen == null || destino == null) {
                 logArea.append("Error: Complete todos los campos\n");
                 return;
             }
 
+            if (origen.equals(destino)) {
+                logArea.append("Error: Origen y destino no pueden ser iguales\n");
+                return;
+            }
+
             Solicitud solicitud = controller.registrarSolicitud(cliente, origen, destino, prioridad);
-            logArea.append("Solicitud #" + solicitud.id + " registrada\n");
+            logArea.append("✓ Solicitud #" + solicitud.id + " registrada: " + origen + " → " + destino + "\n");
 
             clienteField.setText("");
-            origenField.setText("");
-            destinoField.setText("");
         });
 
         return panel;
@@ -113,33 +129,34 @@ public class TranspoRouteGUI extends JFrame {
         procesarBtn.addActionListener(e -> {
             Servicio servicio = controller.procesarSiguienteServicio();
             if (servicio == null) {
-                resultadoArea.append("No hay solicitudes pendientes\n");
+                resultadoArea.setText("No hay solicitudes pendientes\n");
             } else {
                 resultadoArea.setText(""); // Limpiar área
-                resultadoArea.append("╔════════════════════════════════════════════════════════════════╗\n");
-                resultadoArea.append("║  SERVICIO #" + servicio.id + " COMPLETADO\n");
-                resultadoArea.append("╚════════════════════════════════════════════════════════════════╝\n\n");
+                resultadoArea.append("═══════════════════════════════════════════════════════════════\n");
+                resultadoArea.append("SERVICIO #" + servicio.id + " COMPLETADO\n");
+                resultadoArea.append("═══════════════════════════════════════════════════════════════\n\n");
                 
-                resultadoArea.append("📋 INFORMACIÓN GENERAL:\n");
-                resultadoArea.append("   Cliente: " + servicio.solicitud.cliente + "\n");
-                resultadoArea.append("   Vehículo: " + servicio.vehiculo.id + " (Zona: " + servicio.vehiculo.zona + ")\n");
-                resultadoArea.append("   Origen: " + servicio.solicitud.origen + "\n");
-                resultadoArea.append("   Destino: " + servicio.solicitud.destino + "\n");
-                resultadoArea.append("   Costo Total: $" + String.format("%.2f", servicio.costo) + "\n\n");
+                resultadoArea.append("INFORMACIÓN GENERAL:\n");
+                resultadoArea.append("  Cliente: " + servicio.solicitud.cliente + "\n");
+                resultadoArea.append("  Vehículo: " + servicio.vehiculo.id + " (Zona: " + servicio.vehiculo.zona + ")\n");
+                resultadoArea.append("  Ruta: " + servicio.solicitud.origen + " → " + servicio.solicitud.destino + "\n");
+                resultadoArea.append("  Costo Total: $" + String.format("%.2f", servicio.costo) + "\n\n");
                 
-                resultadoArea.append("🚗 RUTA DEL VEHÍCULO AL CLIENTE:\n");
-                resultadoArea.append("   " + (servicio.rutaVehiculoCliente != null && !servicio.rutaVehiculoCliente.isEmpty() 
+                resultadoArea.append("RUTA DEL VEHÍCULO AL CLIENTE:\n");
+                String rutaVehiculo = servicio.rutaVehiculoCliente != null && !servicio.rutaVehiculoCliente.isEmpty() 
                     ? servicio.rutaVehiculoCliente 
-                    : "Vehículo ya en ubicación del cliente") + "\n\n");
+                    : "Vehículo ya en ubicación";
+                resultadoArea.append("  " + rutaVehiculo + "\n\n");
                 
-                resultadoArea.append("👤 RUTA DEL CLIENTE AL DESTINO:\n");
-                resultadoArea.append("   " + (servicio.rutaClienteDestino != null && !servicio.rutaClienteDestino.isEmpty() 
+                resultadoArea.append("RUTA DEL CLIENTE AL DESTINO:\n");
+                String rutaCliente = servicio.rutaClienteDestino != null && !servicio.rutaClienteDestino.isEmpty() 
                     ? servicio.rutaClienteDestino 
-                    : "No disponible") + "\n\n");
+                    : "No disponible";
+                resultadoArea.append("  " + rutaCliente + "\n\n");
                 
                 if (servicio.algoritmoDetalle != null && !servicio.algoritmoDetalle.isEmpty()) {
                     resultadoArea.append("═══════════════════════════════════════════════════════════════\n");
-                    resultadoArea.append("🔍 DETALLE DEL ALGORITMO DE ENRUTAMIENTO\n");
+                    resultadoArea.append("DETALLE DEL ALGORITMO\n");
                     resultadoArea.append("═══════════════════════════════════════════════════════════════\n\n");
                     resultadoArea.append(servicio.algoritmoDetalle);
                 }
@@ -204,6 +221,92 @@ public class TranspoRouteGUI extends JFrame {
         panel.add(mostrarBtn, BorderLayout.NORTH);
         panel.add(new JScrollPane(historialArea), BorderLayout.CENTER);
 
+        return panel;
+    }
+    
+    private JPanel crearPanelBFS() {
+        JPanel panel = new JPanel(new BorderLayout());
+        
+        JPanel topPanel = new JPanel();
+        JLabel label = new JLabel("Nodo Inicial:");
+        JComboBox<String> nodoCombo = new JComboBox<>();
+        
+        // Llenar combo con nodos disponibles
+        List<String> nodos = controller.obtenerNodosDisponibles();
+        for (String nodo : nodos) {
+            nodoCombo.addItem(nodo);
+        }
+        
+        JButton explorarBtn = new JButton("Explorar con BFS");
+        
+        topPanel.add(label);
+        topPanel.add(nodoCombo);
+        topPanel.add(explorarBtn);
+        
+        JTextArea resultadoArea = new JTextArea(25, 70);
+        resultadoArea.setEditable(false);
+        resultadoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+        
+        explorarBtn.addActionListener(e -> {
+            String nodoInicio = (String) nodoCombo.getSelectedItem();
+            if (nodoInicio != null) {
+                String resultado = controller.explorarMapaBFS(nodoInicio);
+                resultadoArea.setText(resultado);
+            }
+        });
+        
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(resultadoArea), BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    private JPanel crearPanelPersistencia() {
+        JPanel panel = new JPanel(new BorderLayout());
+        
+        JPanel botonesPanel = new JPanel();
+        JButton guardarBtn = new JButton("💾 Guardar Datos");
+        JButton cargarBtn = new JButton("📂 Cargar Datos");
+        
+        botonesPanel.add(guardarBtn);
+        botonesPanel.add(cargarBtn);
+        
+        JTextArea infoArea = new JTextArea(20, 60);
+        infoArea.setEditable(false);
+        infoArea.setText("SISTEMA DE PERSISTENCIA\n\n");
+        infoArea.append("Aquí puedes guardar y cargar los datos del sistema.\n\n");
+        infoArea.append("Se guardan:\n");
+        infoArea.append("  • Vehículos y su estado\n");
+        infoArea.append("  • Servicios realizados\n");
+        infoArea.append("  • Mapa de conexiones\n\n");
+        infoArea.append("Los archivos se guardan en:\n");
+        infoArea.append("  - vehiculos.txt\n");
+        infoArea.append("  - servicios.txt\n");
+        infoArea.append("  - mapa.txt\n");
+        
+        guardarBtn.addActionListener(e -> {
+            try {
+                controller.guardarDatos();
+                infoArea.append("\n✓ Datos guardados exitosamente\n");
+                logArea.append("Datos guardados en archivos\n");
+            } catch (Exception ex) {
+                infoArea.append("\n✗ Error al guardar: " + ex.getMessage() + "\n");
+            }
+        });
+        
+        cargarBtn.addActionListener(e -> {
+            try {
+                controller.cargarDatos();
+                infoArea.append("\n✓ Datos cargados exitosamente\n");
+                logArea.append("Datos cargados desde archivos\n");
+            } catch (Exception ex) {
+                infoArea.append("\n✗ Error al cargar: " + ex.getMessage() + "\n");
+            }
+        });
+        
+        panel.add(botonesPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(infoArea), BorderLayout.CENTER);
+        
         return panel;
     }
 }

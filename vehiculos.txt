@@ -1,0 +1,5 @@
+V1,Centro,0,true,5.0
+V2,Norte,0,true,5.0
+V3,Sur,0,true,5.0
+V4,Este,0,true,5.0
+V5,Oeste,0,true,5.0

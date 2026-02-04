@@ -5,6 +5,7 @@ import java.util.List;
 import domain.Servicio;
 import domain.Solicitud;
 import domain.Utils;
+import domain.Utils.Grafo;
 import domain.Vehiculo;
 
 public class GuiController {
@@ -14,7 +15,7 @@ public class GuiController {
         this.requestController = requestController;
     }
 
-    public Utils.Grafo getMapa() {
+    public Grafo getMapa() {
         return requestController.getMapa();
     }
 
@@ -32,5 +33,21 @@ public class GuiController {
 
     public List<Vehiculo> obtenerVehiculosOrdenadosQuickSort() {
         return requestController.obtenerVehiculosOrdenadosQuickSort();
+    }
+    
+    public String explorarMapaBFS(String inicio) {
+        return requestController.explorarMapaBFS(inicio);
+    }
+    
+    public List<String> obtenerNodosDisponibles() {
+        return requestController.obtenerNodosDisponibles();
+    }
+    
+    public void guardarDatos() {
+        requestController.guardarDatos();
+    }
+    
+    public void cargarDatos() {
+        requestController.cargarDatos();
     }
 }

@@ -1,0 +1,12 @@
+Sur,Centro,4
+Sur,Oeste,6
+Centro,Norte,5
+Centro,Sur,4
+Centro,Este,10
+Oeste,Sur,6
+Oeste,Este,8
+Norte,Centro,5
+Norte,Este,7
+Este,Norte,7
+Este,Oeste,8
+Este,Centro,10

@@ -218,6 +218,82 @@ public class Graph {
         return path;
     }
     
+    // BFS - Recorrido en anchura
+    public String bfsExploration(String inicio) {
+        StringBuilder resultado = new StringBuilder();
+        resultado.append("=== EXPLORACIÓN BFS (Breadth-First Search) ===\n");
+        resultado.append("Inicio: ").append(inicio).append("\n\n");
+        
+        if (!hasNode(inicio)) {
+            resultado.append("Error: Nodo no encontrado\n");
+            return resultado.toString();
+        }
+        
+        int total = nodes.getSize();
+        boolean[] visitado = new boolean[total];
+        StringList cola = new StringList();
+        StringList recorrido = new StringList();
+        
+        int inicioIndex = getNodeIndex(inicio);
+        visitado[inicioIndex] = true;
+        cola.add(inicio);
+        
+        resultado.append("Paso a paso:\n");
+        int paso = 1;
+        
+        int headIndex = 0;
+        while (headIndex < cola.getSize()) {
+            String actual = cola.get(headIndex);
+            headIndex++;
+            recorrido.add(actual);
+            
+            resultado.append(paso++).append(". Visitando: ").append(actual).append("\n");
+            
+            GraphNode nodo = getNode(actual);
+            String[] vecinos = nodo.getNeighbors();
+            
+            resultado.append("   Vecinos: ");
+            boolean tieneVecinos = false;
+            for (int i = 0; i < vecinos.length; i++) {
+                if (vecinos[i] != null) {
+                    tieneVecinos = true;
+                    int vecinoIndex = getNodeIndex(vecinos[i]);
+                    if (!visitado[vecinoIndex]) {
+                        visitado[vecinoIndex] = true;
+                        cola.add(vecinos[i]);
+                        resultado.append(vecinos[i]).append(" (agregado) ");
+                    } else {
+                        resultado.append(vecinos[i]).append(" (ya visitado) ");
+                    }
+                }
+            }
+            if (!tieneVecinos) {
+                resultado.append("ninguno");
+            }
+            resultado.append("\n\n");
+        }
+        
+        resultado.append("Orden de recorrido: ");
+        for (int i = 0; i < recorrido.getSize(); i++) {
+            resultado.append(recorrido.get(i));
+            if (i < recorrido.getSize() - 1) resultado.append(" → ");
+        }
+        resultado.append("\n");
+        
+        return resultado.toString();
+    }
+    
+    public StringList getAllNodeNames() {
+        StringList names = new StringList();
+        for (int i = 0; i < nodes.getSize(); i++) {
+            GraphNode node = nodes.get(i);
+            if (node != null) {
+                names.add(node.getName());
+            }
+        }
+        return names;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Graph{\n");

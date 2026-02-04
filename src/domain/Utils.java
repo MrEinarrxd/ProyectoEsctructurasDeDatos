@@ -154,9 +154,17 @@ public class Utils {
             public int distancia;
         }
 
+        public void limpiar() {
+            mapa.clear();
+        }
+
         public void agregarConexion(String origen, String destino, int distancia) {
             mapa.putIfAbsent(origen, new ArrayList<>());
             mapa.putIfAbsent(destino, new ArrayList<>());
+
+            // Eliminar aristas existentes con el mismo destino para evitar duplicados
+            mapa.get(origen).removeIf(a -> a.destino.equals(destino));
+            mapa.get(destino).removeIf(a -> a.destino.equals(origen));
 
             Arista a1 = new Arista();
             a1.destino = destino;
@@ -196,29 +204,61 @@ public class Utils {
             return distancias;
         }
 
-        // BFS
-        List<String> bfs(String inicio) {
-            List<String> resultado = new ArrayList<>();
+        // BFS con detalles
+        public String bfs(String inicio) {
+            StringBuilder resultado = new StringBuilder();
+            resultado.append("=== EXPLORACIÓN BFS (Breadth-First Search) ===\n");
+            resultado.append("Inicio: ").append(inicio).append("\n\n");
+            
+            if (!mapa.containsKey(inicio)) {
+                resultado.append("Error: Nodo no encontrado\n");
+                return resultado.toString();
+            }
+            
             Queue<String> cola = new LinkedList<>();
             Set<String> visitado = new HashSet<>();
-
-            if (!mapa.containsKey(inicio)) return resultado;
+            List<String> recorrido = new ArrayList<>();
 
             cola.add(inicio);
             visitado.add(inicio);
+            
+            resultado.append("Paso a paso:\n");
+            int paso = 1;
 
             while (!cola.isEmpty()) {
                 String actual = cola.poll();
-                resultado.add(actual);
+                recorrido.add(actual);
+                
+                resultado.append(paso++).append(". Visitando: ").append(actual).append("\n");
+                resultado.append("   Vecinos: ");
 
-                for (Arista arista : mapa.get(actual)) {
-                    if (!visitado.contains(arista.destino)) {
-                        cola.add(arista.destino);
-                        visitado.add(arista.destino);
+                boolean tieneVecinos = false;
+                if (mapa.containsKey(actual)) {
+                    for (Arista arista : mapa.get(actual)) {
+                        tieneVecinos = true;
+                        if (!visitado.contains(arista.destino)) {
+                            cola.add(arista.destino);
+                            visitado.add(arista.destino);
+                            resultado.append(arista.destino).append(" (agregado) ");
+                        } else {
+                            resultado.append(arista.destino).append(" (ya visitado) ");
+                        }
                     }
                 }
+                if (!tieneVecinos) {
+                    resultado.append("ninguno");
+                }
+                resultado.append("\n\n");
             }
-            return resultado;
+            
+            resultado.append("Orden de recorrido completo: ");
+            for (int i = 0; i < recorrido.size(); i++) {
+                resultado.append(recorrido.get(i));
+                if (i < recorrido.size() - 1) resultado.append(" → ");
+            }
+            resultado.append("\n");
+            
+            return resultado.toString();
         }
 
         // DFS
@@ -512,13 +552,10 @@ public class Utils {
         Servicio servicio = new Servicio(solicitud, vehiculo,
             solicitud.origen + "->" + solicitud.destino, costo);
         
-        // Agregar información detallada de las rutas
+        // Agregar información detallada de las rutas de forma simplificada
         servicio.rutaVehiculoCliente = String.join(" → ", rutaVehiculo.camino);
         servicio.rutaClienteDestino = String.join(" → ", rutaCliente.camino);
-        servicio.algoritmoDetalle = "=== FASE 1: Vehículo → Cliente ===\n" + 
-                                   rutaVehiculo.detalleAlgoritmo + "\n\n" +
-                                   "=== FASE 2: Cliente → Destino ===\n" + 
-                                   rutaCliente.detalleAlgoritmo;
+        servicio.algoritmoDetalle = rutaCliente.detalleAlgoritmo;
 
         servicios.add(servicio);
         historial.apilar("SERVICIO #" + servicio.id + " creado: $" + costo);
