@@ -54,6 +54,12 @@ public class RequestController {
 		utils.tarifas.agregar("basica", 10.0);
 		utils.tarifas.agregar("premium", 15.0);
 		utils.tarifas.agregar("vip", 25.0);
+		
+		// Solicitudes demo
+		utils.agregarSolicitud(new Solicitud("Juan Pérez", "Centro", "Norte", 3));
+		utils.agregarSolicitud(new Solicitud("María García", "Sur", "Este", 4));
+		utils.agregarSolicitud(new Solicitud("Carlos López", "Oeste", "Noroeste", 2));
+		utils.agregarSolicitud(new Solicitud("Ana Martínez", "Norte", "Suroeste", 1));
 	}
 
 	public Utils.Grafo getMapa() {

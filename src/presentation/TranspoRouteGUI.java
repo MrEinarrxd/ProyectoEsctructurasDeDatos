@@ -22,14 +22,13 @@ import domain.Vehiculo;
 public class TranspoRouteGUI extends JFrame {
     private final GuiController controller;
     private GraphPanel graphPanel;
-    private JTextArea logArea;
 
     public TranspoRouteGUI(GuiController controller) {
         this.controller = controller;
 
         setTitle("TranspoRoute - Sistema de Transporte");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(1000, 700);
 
         initUI();
     }
@@ -52,13 +51,8 @@ public class TranspoRouteGUI extends JFrame {
         tabbedPane.addTab("Historial", crearPanelHistorial());
         tabbedPane.addTab("Persistencia", crearPanelPersistencia());
 
-        logArea = new JTextArea(10, 60);
-        logArea.setEditable(false);
-        JScrollPane scrollLog = new JScrollPane(logArea);
-
         setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
-        add(scrollLog, BorderLayout.SOUTH);
     }
 
     private JPanel crearPanelSolicitud() {
@@ -97,17 +91,14 @@ public class TranspoRouteGUI extends JFrame {
             int prioridad = prioridadCombo.getSelectedIndex() + 1;
 
             if (cliente.isEmpty() || origen == null || destino == null) {
-                logArea.append("Error: Complete todos los campos\n");
                 return;
             }
 
             if (origen.equals(destino)) {
-                logArea.append("Error: Origen y destino no pueden ser iguales\n");
                 return;
             }
 
             Solicitud solicitud = controller.registrarSolicitud(cliente, origen, destino, prioridad);
-            logArea.append("✓ Solicitud #" + solicitud.id + " registrada: " + origen + " → " + destino + "\n");
 
             clienteField.setText("");
         });
@@ -288,7 +279,6 @@ public class TranspoRouteGUI extends JFrame {
             try {
                 controller.guardarDatos();
                 infoArea.append("\n✓ Datos guardados exitosamente\n");
-                logArea.append("Datos guardados en archivos\n");
             } catch (Exception ex) {
                 infoArea.append("\n✗ Error al guardar: " + ex.getMessage() + "\n");
             }
@@ -298,7 +288,6 @@ public class TranspoRouteGUI extends JFrame {
             try {
                 controller.cargarDatos();
                 infoArea.append("\n✓ Datos cargados exitosamente\n");
-                logArea.append("Datos cargados desde archivos\n");
             } catch (Exception ex) {
                 infoArea.append("\n✗ Error al cargar: " + ex.getMessage() + "\n");
             }
