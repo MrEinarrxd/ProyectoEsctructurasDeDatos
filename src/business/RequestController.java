@@ -50,16 +50,6 @@ public class RequestController {
 		return servicio;
 	}
 
-	public VehicleList obtenerVehiculosOrdenadosBurbuja() {
-		VehicleList vehiculos = new VehicleList();
-		java.util.List<Vehicle> temp = utils.vehiculos.obtenerTodos();
-		utils.ordenarBurbuja(temp);
-		for (Vehicle v : temp) {
-			vehiculos.add(v);
-		}
-		return vehiculos;
-	}
-
 	public VehicleList obtenerVehiculosOrdenadosQuickSort() {
 		VehicleList vehiculos = new VehicleList();
 		java.util.List<Vehicle> temp = utils.vehiculos.obtenerTodos();
@@ -93,6 +83,10 @@ public class RequestController {
 			utils.colaUrgente.getAll(),
 			utils.colaNormal
 		);
+	}
+	
+	public java.util.List<Service> obtenerServiciosCompletados() {
+		return utils.servicios.getAll();
 	}
 	
 	public StringList obtenerNodosDisponibles() {

@@ -19,20 +19,6 @@ public class Utils {
 
     // ========== ALGORITMOS ==========
 
-    // Bubble sort
-    public void ordenarBurbuja(java.util.List<Vehicle> lista) {
-        int n = lista.size();
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                if (lista.get(j).getServiceCount() < lista.get(j + 1).getServiceCount()) {
-                    Vehicle temp = lista.get(j);
-                    lista.set(j, lista.get(j + 1));
-                    lista.set(j + 1, temp);
-                }
-            }
-        }
-    }
-
     // Quick sort
     public void ordenarRapido(List<Vehicle> lista, int inicio, int fin) {
         if (inicio < fin) {
@@ -47,7 +33,8 @@ public class Utils {
         int i = inicio - 1;
 
         for (int j = inicio; j < fin; j++) {
-            if (lista.get(j).getServiceCount() >= pivote.getServiceCount()) {
+            int cmp = Integer.compare(lista.get(j).getServiceCount(), pivote.getServiceCount());
+            if (cmp > 0 || (cmp == 0 && lista.get(j).getId().compareTo(pivote.getId()) < 0)) {
                 i++;
                 Vehicle temp = lista.get(i);
                 lista.set(i, lista.get(j));

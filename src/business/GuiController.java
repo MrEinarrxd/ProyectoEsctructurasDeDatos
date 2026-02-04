@@ -25,10 +25,6 @@ public class GuiController {
         return requestController.procesarSiguienteServicio();
     }
 
-    public VehicleList obtenerVehiculosOrdenadosBurbuja() {
-        return requestController.obtenerVehiculosOrdenadosBurbuja();
-    }
-
     public VehicleList obtenerVehiculosOrdenadosQuickSort() {
         return requestController.obtenerVehiculosOrdenadosQuickSort();
     }
@@ -39,47 +35,53 @@ public class GuiController {
     
     public String obtenerColasReporte() {
         RequestController.RequestQueuesData data = requestController.obtenerColasReporte();
-        String resultado = "";
-        
-        resultado += "=== COLAS DE SOLICITUDES ===" + "\n\n";
-        
-        resultado += "[URGENTE] COLA URGENTE (Prioridad >= 3):" + "\n";
-        resultado += "Tamaño: " + data.solicitudesUrgentes.getSize() + "\n";
+        StringBuilder resultado = new StringBuilder();
+
+        resultado.append("=== COLA DE SERVICIOS ===\n\n");
+
+        resultado.append("[URGENTE] COLA URGENTE (Prioridad >= 3):\n");
+        resultado.append("Tamaño: ").append(data.solicitudesUrgentes.getSize()).append("\n");
         if (data.solicitudesUrgentes.isEmpty()) {
-            resultado += "  [Vacía]\n";
+            resultado.append("  [Vacía]\n");
         } else {
             int index = 1;
             for (Request req : data.solicitudesUrgentes.getAll()) {
-                resultado += "  " + index++ + ". ";
-                resultado += "ID: " + req.getId();
-                resultado += " | Cliente: " + req.getClientName();
-                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                resultado += " | Prioridad: " + req.getPriority();
-                resultado += "\n";
+                resultado.append("  ").append(index++).append(". ");
+                resultado.append("ID: ").append(req.getId());
+                resultado.append(" | Cliente: ").append(req.getClientName());
+                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
+                resultado.append(" | Prioridad: ").append(req.getPriority());
+                resultado.append("\n");
             }
         }
-        
-        resultado += "\n";
-        
-        resultado += "[NORMAL] COLA NORMAL (Prioridad < 3):" + "\n";
-        resultado += "Tamaño: " + data.solicitudesNormales.getSize() + "\n";
+
+        resultado.append("\n");
+
+        resultado.append("[NORMAL] COLA NORMAL (Prioridad < 3):\n");
+        resultado.append("Tamaño: ").append(data.solicitudesNormales.getSize()).append("\n");
         if (data.solicitudesNormales.isEmpty()) {
-            resultado += "  [Vacía]\n";
+            resultado.append("  [Vacía]\n");
         } else {
             int index = 1;
             for (Request req : data.solicitudesNormales.getAll()) {
-                resultado += "  " + index++ + ". ";
-                resultado += "ID: " + req.getId();
-                resultado += " | Cliente: " + req.getClientName();
-                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                resultado += " | Prioridad: " + req.getPriority();
-                resultado += "\n";
+                resultado.append("  ").append(index++).append(". ");
+                resultado.append("ID: ").append(req.getId());
+                resultado.append(" | Cliente: ").append(req.getClientName());
+                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
+                resultado.append(" | Prioridad: ").append(req.getPriority());
+                resultado.append("\n");
             }
         }
-        
-        resultado += "\nTotal de solicitudes pendientes: " + (data.solicitudesUrgentes.getSize() + data.solicitudesNormales.getSize());
-        
-        return resultado;
+
+        resultado.append("\nTotal de solicitudes pendientes: ")
+            .append(data.solicitudesUrgentes.getSize() + data.solicitudesNormales.getSize())
+            .append("\n");
+
+        return resultado.toString();
+    }
+
+    public java.util.List<Service> obtenerServiciosCompletados() {
+        return requestController.obtenerServiciosCompletados();
     }
     
     public StringList obtenerNodosDisponibles() {

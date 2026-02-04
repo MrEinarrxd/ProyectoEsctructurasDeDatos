@@ -1,7 +1,1 @@
 NORMAL: Ana Martínez de Norte a Suroeste
-SERVICIO #1 creado: $210.0
-[2026-02-04 09:41:47] Solicitud procesada - Servicio #1 para Ana Martínez
-No hay solicitudes pendientes
-[2026-02-04 09:41:55] Intento de procesar solicitud - Sin solicitudes pendientes
-No hay solicitudes pendientes
-[2026-02-04 09:41:56] Intento de procesar solicitud - Sin solicitudes pendientes

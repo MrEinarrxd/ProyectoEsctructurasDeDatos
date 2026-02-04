@@ -23,6 +23,9 @@ public class TranspoRouteGUI extends JFrame {
     private final GuiController controller;
     private GraphPanel graphPanel;
     private JTextArea historialArea;
+    private JTextArea reporteArea;
+    private JLabel reporteUpdateLabel;
+    private int reporteUpdateCount = 0;
 
     public TranspoRouteGUI(GuiController controller) {
         this.controller = controller;
@@ -169,45 +172,17 @@ public class TranspoRouteGUI extends JFrame {
     private JPanel crearPanelReportes() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        JTextArea reporteArea = new JTextArea(20, 60);
+        reporteArea = new JTextArea(20, 60);
         reporteArea.setEditable(false);
 
-        JPanel botonesPanel = new JPanel();
-        JButton reporte1Btn = new JButton("Orden Burbuja (servicios)");
-        JButton reporte2Btn = new JButton("Orden QuickSort (servicios)");
-        JButton reporteColasBtn = new JButton("Colas de Solicitudes");
+        JPanel topPanel = new JPanel(new BorderLayout());
+        reporteUpdateLabel = new JLabel("Actualizaciones del reporte: 0");
+        topPanel.add(reporteUpdateLabel, BorderLayout.WEST);
 
-        botonesPanel.add(reporte1Btn);
-        botonesPanel.add(reporte2Btn);
-        botonesPanel.add(reporteColasBtn);
-
-        reporte1Btn.addActionListener(e -> {
-            VehicleList vehiculos = controller.obtenerVehiculosOrdenadosBurbuja();
-            reporteArea.setText("=== VEHICULOS ORDENADOS (BURBUJA) ===\n");
-            for (int i = 0; i < vehiculos.getSize(); i++) {
-                reporteArea.append(vehiculos.get(i) + "\n");
-            }
-            agregarAlHistorial("Reporte generado - Orden Burbuja (servicios)");
-        });
-
-        reporte2Btn.addActionListener(e -> {
-            VehicleList vehiculos = controller.obtenerVehiculosOrdenadosQuickSort();
-            reporteArea.setText("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");
-            for (int i = 0; i < vehiculos.getSize(); i++) {
-                reporteArea.append(vehiculos.get(i) + "\n");
-            }
-            agregarAlHistorial("Reporte generado - Orden QuickSort (servicios)");
-        });
-
-        reporteColasBtn.addActionListener(e -> {
-            String reporte = controller.obtenerColasReporte();
-            reporteArea.setText(reporte);
-            agregarAlHistorial("Reporte generado - Colas de Solicitudes");
-        });
-
-        panel.add(botonesPanel, BorderLayout.NORTH);
+        panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(reporteArea), BorderLayout.CENTER);
 
+        actualizarReporte();
         return panel;
     }
 
@@ -247,6 +222,41 @@ public class TranspoRouteGUI extends JFrame {
             String timestamp = sdf.format(new Date());
             historialArea.append("[" + timestamp + "] " + evento + "\n");
             historialArea.setCaretPosition(historialArea.getDocument().getLength());
+        }
+        actualizarReporte();
+    }
+
+    private void actualizarReporte() {
+        if (reporteArea == null) {
+            return;
+        }
+
+        VehicleList vehiculos = controller.obtenerVehiculosOrdenadosQuickSort();
+        reporteArea.setText("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");
+        for (int i = 0; i < vehiculos.getSize(); i++) {
+            reporteArea.append(vehiculos.get(i) + "\n");
+        }
+
+        reporteArea.append("\n");
+        String reporte = controller.obtenerColasReporte();
+        reporteArea.append(reporte);
+
+        reporteArea.append("\n=== SERVICIOS COMPLETADOS ===\n");
+        java.util.List<Service> servicios = controller.obtenerServiciosCompletados();
+        if (servicios.isEmpty()) {
+            reporteArea.append("[Sin servicios completados]\n");
+        } else {
+            for (Service servicio : servicios) {
+                reporteArea.append("#" + servicio.id + " | Cliente: " + servicio.request.getClientName());
+                reporteArea.append(" | Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination());
+                reporteArea.append(" | Vehículo: " + servicio.vehicle.getId());
+                reporteArea.append(" | Costo: $" + servicio.cost + "\n");
+            }
+        }
+
+        reporteUpdateCount++;
+        if (reporteUpdateLabel != null) {
+            reporteUpdateLabel.setText("Actualizaciones del reporte: " + reporteUpdateCount);
         }
     }
 
