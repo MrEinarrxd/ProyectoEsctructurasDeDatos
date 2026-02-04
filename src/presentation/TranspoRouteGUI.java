@@ -1,6 +1,7 @@
 package presentation;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.Date;
 import domain.List.StringList;
@@ -70,6 +71,7 @@ public class TranspoRouteGUI extends JFrame {
                 "1 - Baja", "2 - Media", "3 - Alta", "4 - Emergencia" });
 
         JButton registrarBtn = new JButton("Registrar Solicitud");
+        registrarBtn.setPreferredSize(new Dimension(180, 35));
 
         // Cargar nodos disponibles en los combos
         StringList nodos = controller.obtenerNodosDisponibles();
@@ -117,6 +119,7 @@ public class TranspoRouteGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         JButton procesarBtn = new JButton("Procesar Siguiente Solicitud");
+        procesarBtn.setPreferredSize(new Dimension(250, 40));
         JTextArea resultadoArea = new JTextArea(30, 70);
         resultadoArea.setEditable(false);
         resultadoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
@@ -275,6 +278,7 @@ public class TranspoRouteGUI extends JFrame {
         }
 
         JButton explorarBtn = new JButton("Explorar con BFS");
+        explorarBtn.setPreferredSize(new Dimension(160, 35));
 
         topPanel.add(label);
         topPanel.add(nodoCombo);
@@ -304,6 +308,7 @@ public class TranspoRouteGUI extends JFrame {
 
         JPanel botonesPanel = new JPanel();
         JButton guardarBtn = new JButton("💾 Guardar Datos");
+        guardarBtn.setPreferredSize(new Dimension(180, 40));
 
         botonesPanel.add(guardarBtn);
 
