@@ -3,82 +3,30 @@ package domain.List;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StringList {
-    private class Node {
-        String data;
-        Node next;
-        
-        Node(String data) {
-            this.data = data;
-            this.next = null;
-        }
-    }
-    
-    private Node head;
-    private int size;
-    
-    public StringList() {
-        this.head = null;
-        this.size = 0;
-    }
+public class StringList extends BaseLinkedList {
     
     public void add(String data) {
-        Node newNode = new Node(data);
-        if (head == null) {
-            head = newNode;
-        } else {
-            Node current = head;
-            while (current.next != null) {
-                current = current.next;
-            }
-            current.next = newNode;
-        }
-        size++;
+        super.add(data);
     }
     
     public void addFirst(String data) {
-        Node newNode = new Node(data);
-        newNode.next = head;
-        head = newNode;
-        size++;
+        super.addFirst(data);
     }
     
     public String get(int index) {
-        if (index < 0 || index >= size) {
-            return null;
-        }
-        
-        Node current = head;
-        for (int i = 0; i < index; i++) {
-            current = current.next;
-        }
-        return current.data;
-    }
-    
-    public int getSize() {
-        return size;
-    }
-    
-    public boolean isEmpty() {
-        return size == 0;
+        Object obj = super.get(index);
+        return (String) obj;
     }
     
     public boolean contains(String data) {
-        Node current = head;
-        while (current != null) {
-            if (current.data.equals(data)) {
-                return true;
-            }
-            current = current.next;
-        }
-        return false;
+        return super.contains(data);
     }
     
     public List<String> getAll() {
         List<String> list = new ArrayList<>();
         Node current = head;
         while (current != null) {
-            list.add(current.data);
+            list.add((String) current.data);
             current = current.next;
         }
         return list;
@@ -89,7 +37,7 @@ public class StringList {
         Node current = head;
         int i = 0;
         while (current != null) {
-            arr[i++] = current.data;
+            arr[i++] = (String) current.data;
             current = current.next;
         }
         return arr;
@@ -104,7 +52,7 @@ public class StringList {
         StringBuilder sb = new StringBuilder("[");
         Node current = head;
         while (current != null) {
-            sb.append(current.data);
+            sb.append((String) current.data);
             if (current.next != null) {
                 sb.append(", ");
             }

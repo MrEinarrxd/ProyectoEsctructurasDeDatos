@@ -1,17 +1,17 @@
 package domain.Graphs;
 
 import domain.Vehicle;
-import domain.List.VehicleListGraph;
+import domain.List.VehicleList;
 import domain.List.EdgeList;
 
 public class GraphNode {
     private String name;
-    private VehicleListGraph vehicles;
+    private VehicleList vehicles;
     private EdgeList edges;
     
     public GraphNode(String name) {
         this.name = name;
-        this.vehicles = new VehicleListGraph();
+        this.vehicles = new VehicleList();
         this.edges = new EdgeList();
     }
     
