@@ -203,7 +203,14 @@ public class DataManager {
                         String origen = partes[2].trim();
                         String destino = partes[3].trim();
                         int prioridad = Integer.parseInt(partes[4].trim());
-                        utils.agregarSolicitud(new Request(id, origen, destino, cliente, prioridad));
+                        Request solicitud = new Request(id, origen, destino, cliente, prioridad);
+                        if (solicitud.getPriority() >= 3) {
+                            utils.colaUrgente.enqueue(solicitud, solicitud.getPriority());
+                            utils.historialEventos.add("URGENTE: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                        } else {
+                            utils.colaNormal.enqueue(solicitud);
+                            utils.historialEventos.add("NORMAL: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                        }
                     }
                 }
             }

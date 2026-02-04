@@ -1,10 +1,8 @@
 package domain;
-import java.util.List;
 import domain.List.RequestQueue;
 import domain.List.RequestPriorityQueue;
 import domain.List.StringList;
 import domain.List.ServiceList;
-import domain.Graphs.PathResult;
 import domain.Graphs.Graph;
 import domain.List.VehicleList;
 
@@ -16,104 +14,4 @@ public class Utils {
     public Graph mapa = new Graph();
     public RateTree tarifas = new RateTree();
     public ServiceList servicios = new ServiceList();
-
-    // ========== ALGORITMOS ==========
-
-    // Quick sort
-    public void ordenarRapido(List<Vehicle> lista, int inicio, int fin) {
-        if (inicio < fin) {
-            int pivote = particionar(lista, inicio, fin);
-            ordenarRapido(lista, inicio, pivote - 1);
-            ordenarRapido(lista, pivote + 1, fin);
-        }
-    }
-
-    private int particionar(List<Vehicle> lista, int inicio, int fin) {
-        Vehicle pivote = lista.get(fin);
-        int i = inicio - 1;
-
-        for (int j = inicio; j < fin; j++) {
-            int cmp = Integer.compare(lista.get(j).getServiceCount(), pivote.getServiceCount());
-            if (cmp > 0 || (cmp == 0 && lista.get(j).getId().compareTo(pivote.getId()) < 0)) {
-                i++;
-                Vehicle temp = lista.get(i);
-                lista.set(i, lista.get(j));
-                lista.set(j, temp);
-            }
-        }
-
-        Vehicle temp = lista.get(i + 1);
-        lista.set(i + 1, lista.get(fin));
-        lista.set(fin, temp);
-
-        return i + 1;
-    }
-
-    // Greedy
-    public Vehicle asignarVehiculoGreedy(String zona) {
-        Vehicle v = vehiculos.buscarDisponible(zona);
-        if (v != null) return v;
-
-        List<Vehicle> todos = vehiculos.obtenerTodos();
-        for (Vehicle vehiculo : todos) {
-            if (vehiculo.isAvailable()) {
-                return vehiculo;
-            }
-        }
-        return null;
-    }
-
-    // ========== METODOS PRINCIPALES ==========
-    public void agregarSolicitud(Request s) {
-        if (s.getPriority() >= 3) {
-            colaUrgente.enqueue(s, s.getPriority());
-            historialEventos.add("URGENTE: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
-        } else {
-            colaNormal.enqueue(s);
-            historialEventos.add("NORMAL: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
-        }
-    }
-
-    public Service procesarSiguiente() {
-        Request solicitud = colaUrgente.dequeue();
-        if (solicitud == null) {
-            solicitud = colaNormal.dequeue();
-        }
-
-        if (solicitud == null) {
-            historialEventos.add("No hay solicitudes pendientes");
-            return null;
-        }
-
-        Vehicle vehiculo = asignarVehiculoGreedy(solicitud.getOrigin());
-        if (vehiculo == null) {
-            historialEventos.add("ERROR: No hay vehiculos para " + solicitud.getOrigin());
-            return null;
-        }
-
-        // Calcular ruta detallada desde vehículo hasta cliente
-        PathResult rutaVehiculo = mapa.calcularRutaDijkstra(vehiculo.getCurrentZone(), solicitud.getOrigin());
-        
-        // Calcular ruta detallada desde cliente hasta destino
-        PathResult rutaCliente = mapa.calcularRutaDijkstra(solicitud.getOrigin(), solicitud.getDestination());
-        
-        int distanciaTotal = rutaVehiculo.distanciaTotal + rutaCliente.distanciaTotal;
-
-        double tarifaBase = tarifas.search("basica");
-        if (tarifaBase == 0) tarifaBase = 10.0;
-        double costo = tarifaBase * distanciaTotal;
-
-        Service servicio = new Service(solicitud, vehiculo,
-            solicitud.getOrigin() + "->" + solicitud.getDestination(), costo);
-        
-        // Agregar información detallada de las rutas de forma simplificada
-        servicio.vehicleToClientRoute = String.join(" -> ", rutaVehiculo.camino.toArray());
-        servicio.clientToDestinationRoute = String.join(" -> ", rutaCliente.camino.toArray());
-        servicio.algorithmDetail = rutaCliente.detalleAlgoritmo;
-
-        servicios.add(servicio);
-        historialEventos.add("SERVICIO #" + servicio.id + " creado: $" + costo);
-
-        return servicio;
-    }
 }

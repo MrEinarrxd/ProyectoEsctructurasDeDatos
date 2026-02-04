@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.Date;
 import domain.List.StringList;
+import domain.List.ServiceList;
 import domain.List.VehicleList;
 
 import javax.swing.JButton;
@@ -242,11 +243,12 @@ public class TranspoRouteGUI extends JFrame {
         reporteArea.append(reporte);
 
         reporteArea.append("\n=== SERVICIOS COMPLETADOS ===\n");
-        java.util.List<Service> servicios = controller.obtenerServiciosCompletados();
+        ServiceList servicios = controller.obtenerServiciosCompletados();
         if (servicios.isEmpty()) {
             reporteArea.append("[Sin servicios completados]\n");
         } else {
-            for (Service servicio : servicios) {
+            for (int i = 0; i < servicios.getSize(); i++) {
+                Service servicio = servicios.get(i);
                 reporteArea.append("#" + servicio.id + " | Cliente: " + servicio.request.getClientName());
                 reporteArea.append(" | Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination());
                 reporteArea.append(" | Vehículo: " + servicio.vehicle.getId());
