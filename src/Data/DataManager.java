@@ -206,10 +206,10 @@ public class DataManager {
                         Request solicitud = new Request(id, origen, destino, cliente, prioridad);
                         if (solicitud.getPriority() >= 3) {
                             utils.colaUrgente.enqueue(solicitud, solicitud.getPriority());
-                            utils.historialEventos.add("URGENTE: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                            utils.historialEventos.push("URGENTE: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
                         } else {
                             utils.colaNormal.enqueue(solicitud);
-                            utils.historialEventos.add("NORMAL: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                            utils.historialEventos.push("NORMAL: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
                         }
                     }
                 }

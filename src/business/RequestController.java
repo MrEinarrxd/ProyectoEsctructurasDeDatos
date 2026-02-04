@@ -10,7 +10,7 @@ import domain.Service;
 import domain.Request;
 import domain.Utils;
 import domain.Graphs.Graph;
-import domain.Graphs.PathResult;
+import domain.Graphs.Path;
 import domain.Vehicle;
 import Data.DataManager;
 
@@ -115,17 +115,17 @@ public class RequestController {
 	public void registrarEvento(String evento) {
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String timestamp = sdf.format(new Date());
-		utils.historialEventos.add("[" + timestamp + "] " + evento);
+		utils.historialEventos.push("[" + timestamp + "] " + evento);
 	}
 
 	// ====== Métodos del controller ======
 	private void agregarSolicitud(Request s) {
 		if (s.getPriority() >= 3) {
 			utils.colaUrgente.enqueue(s, s.getPriority());
-			utils.historialEventos.add("URGENTE: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
+			utils.historialEventos.push("URGENTE: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
 		} else {
 			utils.colaNormal.enqueue(s);
-			utils.historialEventos.add("NORMAL: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
+			utils.historialEventos.push("NORMAL: " + s.getClientName() + " de " + s.getOrigin() + " a " + s.getDestination());
 		}
 	}
 
@@ -136,18 +136,18 @@ public class RequestController {
 		}
 
 		if (solicitud == null) {
-			utils.historialEventos.add("No hay solicitudes pendientes");
+			utils.historialEventos.push("No hay solicitudes pendientes");
 			return null;
 		}
 
 		Vehicle vehiculo = asignarVehiculoGreedy(solicitud.getOrigin());
 		if (vehiculo == null) {
-			utils.historialEventos.add("ERROR: No hay vehiculos para " + solicitud.getOrigin());
+			utils.historialEventos.push("ERROR: No hay vehiculos para " + solicitud.getOrigin());
 			return null;
 		}
 
-		PathResult rutaVehiculo = utils.mapa.calcularRutaDijkstra(vehiculo.getCurrentZone(), solicitud.getOrigin());
-		PathResult rutaCliente = utils.mapa.calcularRutaDijkstra(solicitud.getOrigin(), solicitud.getDestination());
+		Path rutaVehiculo = utils.mapa.calcularRutaDijkstra(vehiculo.getCurrentZone(), solicitud.getOrigin());
+		Path rutaCliente = utils.mapa.calcularRutaDijkstra(solicitud.getOrigin(), solicitud.getDestination());
 
 		int distanciaTotal = rutaVehiculo.distanciaTotal + rutaCliente.distanciaTotal;
 
@@ -163,7 +163,7 @@ public class RequestController {
 		servicio.algorithmDetail = rutaCliente.detalleAlgoritmo;
 
 		utils.servicios.add(servicio);
-		utils.historialEventos.add("SERVICIO #" + servicio.id + " creado: $" + costo);
+		utils.historialEventos.push("SERVICIO #" + servicio.id + " creado: $" + costo);
 
 		return servicio;
 	}

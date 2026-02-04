@@ -126,14 +126,14 @@ public class Graph {
         return resultado.toString();
     }
     
-    public PathResult shortestPath(String from, String to) {
+    public Path shortestPath(String from, String to) {
         if (!hasNode(from) || !hasNode(to)) {
-            return new PathResult(-1, new StringList());
+            return new Path(-1, new StringList());
         }
         if (from.equals(to)) {
             StringList path = new StringList();
             path.add(from);
-            return new PathResult(0, path);
+            return new Path(0, path);
         }
         
         int total = nodes.getSize();
@@ -158,9 +158,9 @@ public class Graph {
             
             if (currentName.equals(to)) {
                 StringList path = reconstructPath(previous, from, to);
-                return new PathResult(distance[getNodeIndex(to)], path);
+                return new Path(distance[getNodeIndex(to)], path);
             }
-            
+
             GraphNode currentNode = getNode(currentName);
             String[] neighbors = currentNode.getNeighbors();
             
@@ -177,17 +177,17 @@ public class Graph {
                 }
             }
         }
-        return new PathResult(-1, new StringList());
+        return new Path(-1, new StringList());
     }
     
-    public PathResult dijkstra(String source, String target) {
+    public Path dijkstra(String source, String target) {
         if (!hasNode(source) || !hasNode(target)) {
-            return new PathResult(-1, new StringList());
+            return new Path(-1, new StringList());
         }
         if (source.equals(target)) {
             StringList path = new StringList();
             path.add(source);
-            return new PathResult(0, path);
+            return new Path(0, path);
         }
         
         int total = nodes.getSize();
@@ -241,7 +241,7 @@ public class Graph {
         
         int targetIndex = getNodeIndex(target);
         if (distance[targetIndex] == Integer.MAX_VALUE) {
-            return new PathResult(-1, new StringList());
+            return new Path(-1, new StringList());
         }
         
         StringList path = new StringList();
@@ -252,11 +252,11 @@ public class Graph {
             current = previous[getNodeIndex(current)];
         }
         
-        return new PathResult(distance[targetIndex], path);
+        return new Path(distance[targetIndex], path);
     }
 
-    public PathResult calcularRutaDijkstra(String inicio, String fin) {
-        PathResult resultado = new PathResult();
+    public Path calcularRutaDijkstra(String inicio, String fin) {
+        Path resultado = new Path();
         StringBuilder detalle = new StringBuilder();
 
         if (!hasNode(inicio) || !hasNode(fin)) {

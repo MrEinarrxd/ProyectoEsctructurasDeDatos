@@ -2,7 +2,7 @@ package domain.Graphs;
 
 import domain.List.StringList;
 
-public class PathResult {
+public class Path {
     public final int distance;
     public final StringList path;
     
@@ -12,7 +12,7 @@ public class PathResult {
     public String detalleAlgoritmo;
     
     // Constructor original
-    public PathResult(int distance, StringList path) {
+    public Path(int distance, StringList path) {
         this.distance = distance;
         this.path = path;
         this.camino = new StringList();
@@ -26,7 +26,7 @@ public class PathResult {
     }
     
     // Constructor for detailed results
-    public PathResult() {
+    public Path() {
         this.distance = 0;
         this.path = new StringList();
         this.camino = new StringList();
