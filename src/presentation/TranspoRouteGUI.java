@@ -45,7 +45,7 @@ public class TranspoRouteGUI extends JFrame {
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         tabbedPane.addTab("Mapa", mapScroll);
-        
+    
         tabbedPane.addTab("Exploración BFS", crearPanelBFS());
 
         tabbedPane.addTab("Reportes", crearPanelReportes());
@@ -130,34 +130,34 @@ public class TranspoRouteGUI extends JFrame {
                 resultadoArea.append("=====================================================\n");
                 resultadoArea.append("SERVICIO #" + servicio.id + " COMPLETADO\n");
                 resultadoArea.append("=====================================================\n\n");
-                
+
                 resultadoArea.append("INFORMACIÓN GENERAL:\n");
                 resultadoArea.append("  Cliente: " + servicio.request.getClientName() + "\n");
                 resultadoArea.append("  Vehículo: " + servicio.vehicle.getId() + " (Zona: " + servicio.vehicle.getCurrentZone() + ")\n");
                 resultadoArea.append("  Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination() + "\n");
                 resultadoArea.append("  Costo Total: $" + servicio.cost + "\n\n");
-                
+
                 resultadoArea.append("RUTA DEL VEHÍCULO AL CLIENTE:\n");
                 String rutaVehiculo = servicio.vehicleToClientRoute != null && !servicio.vehicleToClientRoute.isEmpty() 
                     ? servicio.vehicleToClientRoute 
                     : "Vehículo ya en ubicación";
                 resultadoArea.append("  " + rutaVehiculo + "\n\n");
-                
+
                 resultadoArea.append("RUTA DEL CLIENTE AL DESTINO:\n");
                 String rutaCliente = servicio.clientToDestinationRoute != null && !servicio.clientToDestinationRoute.isEmpty() 
                     ? servicio.clientToDestinationRoute 
                     : "No disponible";
                 resultadoArea.append("  " + rutaCliente + "\n\n");
-                
+
                 if (servicio.algorithmDetail != null && !servicio.algorithmDetail.isEmpty()) {
                     resultadoArea.append("=====================================================\n");
                     resultadoArea.append("DETALLE DEL ALGORITMO\n");
                     resultadoArea.append("=====================================================\n\n");
                     resultadoArea.append(servicio.algorithmDetail);
                 }
-                
+
                 agregarAlHistorial("Solicitud procesada - Servicio #" + servicio.id + " para " + servicio.request.getClientName());
-                
+
                 // Posicionar el scroll al inicio
                 resultadoArea.setCaretPosition(0);
             }
@@ -198,7 +198,7 @@ public class TranspoRouteGUI extends JFrame {
             }
             agregarAlHistorial("Reporte generado - Orden QuickSort (servicios)");
         });
-        
+
         reporteColasBtn.addActionListener(e -> {
             String reporte = controller.obtenerColasReporte();
             reporteArea.setText(reporte);
@@ -228,7 +228,7 @@ public class TranspoRouteGUI extends JFrame {
 
         return panel;
     }
-    
+
     private void mostrarTarifasPorDefecto() {
         historialArea.setText("");
         historialArea.append("=== ÁRBOL DE TARIFAS ===\n\n");
@@ -240,7 +240,7 @@ public class TranspoRouteGUI extends JFrame {
         historialArea.append("HISTORIAL DE ACCIONES DEL SISTEMA\n");
         historialArea.append("═══════════════════════════════════════\n\n");
     }
-    
+
     private void agregarAlHistorial(String evento) {
         if (historialArea != null) {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm:ss");
@@ -249,30 +249,30 @@ public class TranspoRouteGUI extends JFrame {
             historialArea.setCaretPosition(historialArea.getDocument().getLength());
         }
     }
-    
+
     private JPanel crearPanelBFS() {
         JPanel panel = new JPanel(new BorderLayout());
-        
+
         JPanel topPanel = new JPanel();
         JLabel label = new JLabel("Nodo Inicial:");
         JComboBox<String> nodoCombo = new JComboBox<>();
-        
+
         // Llenar combo con nodos disponibles
         StringList nodos = controller.obtenerNodosDisponibles();
         for (int i = 0; i < nodos.getSize(); i++) {
             nodoCombo.addItem(nodos.get(i));
         }
-        
+
         JButton explorarBtn = new JButton("Explorar con BFS");
-        
+
         topPanel.add(label);
         topPanel.add(nodoCombo);
         topPanel.add(explorarBtn);
-        
+
         JTextArea resultadoArea = new JTextArea(25, 70);
         resultadoArea.setEditable(false);
         resultadoArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
-        
+
         explorarBtn.addActionListener(e -> {
             String nodoInicio = (String) nodoCombo.getSelectedItem();
             if (nodoInicio != null) {
@@ -281,21 +281,21 @@ public class TranspoRouteGUI extends JFrame {
                 agregarAlHistorial("Búsqueda BFS ejecutada desde nodo: " + nodoInicio);
             }
         });
-        
+
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(resultadoArea), BorderLayout.CENTER);
-        
+
         return panel;
     }
-    
+
     private JPanel crearPanelPersistencia() {
         JPanel panel = new JPanel(new BorderLayout());
-        
+
         JPanel botonesPanel = new JPanel();
         JButton guardarBtn = new JButton("💾 Guardar Datos");
-        
+
         botonesPanel.add(guardarBtn);
-        
+
         JTextArea infoArea = new JTextArea(20, 60);
         infoArea.setEditable(false);
         infoArea.setText("SISTEMA DE PERSISTENCIA\n\n");
@@ -311,7 +311,7 @@ public class TranspoRouteGUI extends JFrame {
         infoArea.append("  - vehiculos.txt\n");
         infoArea.append("  - servicios.txt\n");
         infoArea.append("  - historial.txt\n");
-        
+
         guardarBtn.addActionListener(e -> {
             try {
                 controller.guardarDatos();
@@ -320,10 +320,10 @@ public class TranspoRouteGUI extends JFrame {
                 infoArea.append("\n✗ Error al guardar: " + ex.getMessage() + "\n");
             }
         });
-        
+
         panel.add(botonesPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(infoArea), BorderLayout.CENTER);
-        
+
         return panel;
     }
 }
