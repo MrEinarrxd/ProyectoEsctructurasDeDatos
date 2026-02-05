@@ -4,4 +4,4 @@ V3,Sur,0,true,Driver3,suv
 V4,Este,0,true,Driver4,sedan
 V5,Oeste,0,true,Driver5,van
 V6,Noroeste,0,true,Driver6,sedan
-V7,Suroeste,1,false,Driver7,suv
+V7,Suroeste,0,true,Driver7,suv

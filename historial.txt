@@ -1,4 +1,2 @@
-[2026-02-05 08:07:05] Solicitud procesada - Servicio #1 para Jose Alonso
-SERVICIO #1 creado: $130.0
 EMERGENCIA: Jose Alonso de Suroeste a Noroeste
 REGULAR: Ana Martínez de Norte a Suroeste

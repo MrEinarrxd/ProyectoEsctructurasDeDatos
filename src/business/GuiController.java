@@ -3,6 +3,7 @@ package business;
 import domain.List.VehicleList;
 import domain.List.StringList;
 import domain.List.ServiceList;
+import domain.List.RequestQueue;
 import domain.Service;
 import domain.Request;
 import domain.Graphs.Graph;
@@ -39,8 +40,8 @@ public class GuiController {
     }
     
     public String obtenerColasReporte() {
-        domain.List.RequestQueue colaUrgente = requestController.obtenerColaUrgente();
-        domain.List.RequestQueue colaNormal = requestController.obtenerColaNormal();
+        RequestQueue colaUrgente = requestController.obtenerColaUrgente();
+        RequestQueue colaNormal = requestController.obtenerColaNormal();
         String resultado = "";
 
         resultado += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
