@@ -1,7 +1,5 @@
 package Data;
 import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
 import domain.*;
 import domain.Graphs.Edge;
 import domain.Graphs.Graph;
@@ -59,7 +57,9 @@ public class DataManager {
     // Guardar solicitudes
     public void guardarSolicitudes(domain.List.RequestQueue solicitudes, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Request s : solicitudes.getAll()) {
+            domain.List.RequestQueue queue = solicitudes.getAll();
+            for (int i = 0; i < queue.size(); i++) {
+                Request s = queue.get(i);
                 writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
             }
         } catch (IOException e) {
@@ -70,7 +70,9 @@ public class DataManager {
     // Guardar servicios
     public void guardarServicios(domain.List.ServiceList servicios, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Service s : servicios.getAll()) {
+            domain.List.ServiceList serviceList = servicios.getAll();
+            for (int i = 0; i < serviceList.getSize(); i++) {
+                Service s = serviceList.get(i);
                 writer.println(s.id + "," + s.request.getId() + "," + s.vehicle.getId() + "," + s.route + "," + s.cost);
             }
         } catch (IOException e) {
@@ -129,7 +131,7 @@ public class DataManager {
     public void cargarTodo(Utils utils) {
         VehicleList vehiculos = cargarVehiculos("vehiculos.txt");
         for (Vehicle v : vehiculos.obtenerTodos()) {
-            utils.vehiculos.agregar(v);
+            utils.vehiculos.add(v);
         }
         System.out.println("Datos cargados exitosamente");
     }
@@ -137,8 +139,8 @@ public class DataManager {
     // Guardar historial
     public void guardarHistorial(StringList historialEventos, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (String evento : historialEventos.getAll()) {
-                writer.println(evento);
+            for (int i = 0; i < historialEventos.getSize(); i++) {
+                writer.println(historialEventos.get(i));
             }
         } catch (IOException e) {
             System.out.println("Error guardando historial: " + e.getMessage());
@@ -146,8 +148,8 @@ public class DataManager {
     }
     
     // Cargar historial
-    public List<String> cargarHistorial(String archivo) {
-        List<String> lista = new ArrayList<>();
+    public StringList cargarHistorial(String archivo) {
+        StringList lista = new StringList();
         try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = reader.readLine()) != null) {
@@ -185,7 +187,7 @@ public class DataManager {
                         String driverName = partes[1].trim();
                         String zona = partes[2].trim();
                         String vehicleType = partes[3].trim();
-                        utils.vehiculos.agregar(new Vehicle(id, driverName, zona, vehicleType));
+                        utils.vehiculos.add(new Vehicle(id, driverName, zona, vehicleType));
                     }
                 }
                 else if (seccion.contains("MAPA")) {
