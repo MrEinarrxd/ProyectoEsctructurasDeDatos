@@ -1,7 +1,6 @@
 package domain.List;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class StringList extends BaseLinkedList {
     
@@ -22,8 +21,8 @@ public class StringList extends BaseLinkedList {
         return super.contains(data);
     }
     
-    public List<String> getAll() {
-        List<String> list = new ArrayList<>();
+    public StringList getAll() {
+        StringList list = new StringList();
         Node current = head;
         while (current != null) {
             list.add((String) current.data);
@@ -49,17 +48,17 @@ public class StringList extends BaseLinkedList {
             return "[]";
         }
         
-        StringBuilder sb = new StringBuilder("[");
+        String result = "[";
         Node current = head;
         while (current != null) {
-            sb.append((String) current.data);
+            result += (String) current.data;
             if (current.next != null) {
-                sb.append(", ");
+                result += ", ";
             }
             current = current.next;
         }
-        sb.append("]");
-        return sb.toString();
+        result += "]";
+        return result;
     }
 }
 

@@ -6,7 +6,7 @@ public class Path {
     public final int distance;
     public final StringList path;
     
-    // Properties from DetailedPathResult
+    // información adicional para resultados detallados
     public StringList camino;
     public int distanciaTotal;
     public String detalleAlgoritmo;
@@ -19,13 +19,13 @@ public class Path {
         this.distanciaTotal = distance;
         this.detalleAlgoritmo = "";
         
-        // Convert StringList to StringList
+        // Copiar el camino original al nuevo campo para detalles
         for (int i = 0; i < path.getSize(); i++) {
             this.camino.add(path.get(i));
         }
     }
     
-    // Constructor for detailed results
+    // Constructor vacío
     public Path() {
         this.distance = 0;
         this.path = new StringList();
@@ -40,16 +40,15 @@ public class Path {
             return "No hay ruta disponible";
         }
         
-        StringBuilder sb = new StringBuilder();
-        sb.append("Distancia: ").append(distance).append(" | Ruta: ");
+        String result = "Distancia: " + distance + " | Ruta: ";
         
         for (int i = 0; i < path.getSize(); i++) {
-            sb.append(path.get(i));
+            result += path.get(i);
             if (i < path.getSize() - 1) {
-                sb.append(" -> ");
+                result += " -> ";
             }
         }
         
-        return sb.toString();
+        return result;
     }
 }

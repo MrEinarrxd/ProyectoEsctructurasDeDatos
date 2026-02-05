@@ -110,11 +110,7 @@ public class RequestController {
 	}
 	
 	public StringList obtenerHistorial() {
-		StringList result = new StringList();
-		for (String evento : utils.historialEventos.getAll()) {
-			result.add(evento);
-		}
-		return result;
+		return utils.historialEventos.getAll();
 	}
 	
 	public void registrarEvento(String evento) {
@@ -222,8 +218,8 @@ public class RequestController {
 
 	// Buscar la primera solicitud de una categoría específica en la cola normal
 	private Request buscarSolicitudPorCategoria(int categoria) {
-		domain.List.RequestQueue colaNormal = utils.colaNormal;
-		domain.List.RequestQueue temp = new domain.List.RequestQueue();
+		RequestQueue colaNormal = utils.colaNormal;
+		RequestQueue temp = new RequestQueue();
 		Request encontrada = null;
 
 		// Desencolar todos para buscar
@@ -239,9 +235,9 @@ public class RequestController {
 		}
 
 		// Devolver solicitudes a la cola
-		domain.List.RequestQueue tempAll = temp;
-		for (Request req : tempAll.getAll()) {
-			colaNormal.enqueue(req);
+		RequestQueue tempAll = temp.getAll();
+		for (int i = 0; i < tempAll.size(); i++) {
+			colaNormal.enqueue(tempAll.get(i));
 		}
 
 		return encontrada;

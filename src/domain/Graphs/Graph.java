@@ -65,13 +65,12 @@ public class Graph {
     }
 
     public String bfs(String inicio) {
-        StringBuilder resultado = new StringBuilder();
-        resultado.append("=== EXPLORACIÓN BFS (Breadth-First Search) ===\n");
-        resultado.append("Inicio: ").append(inicio).append("\n\n");
+        String resultado = "=== EXPLORACIÓN BFS (Breadth-First Search) ===\n";
+        resultado += "Inicio: " + inicio + "\n\n";
 
         if (!hasNode(inicio)) {
-            resultado.append("Error: Nodo no encontrado\n");
-            return resultado.toString();
+            resultado += "Error: Nodo no encontrado\n";
+            return resultado;
         }
 
         StringList cola = new StringList();
@@ -81,7 +80,7 @@ public class Graph {
         cola.add(inicio);
         visitado.add(inicio);
 
-        resultado.append("Paso a paso:\n");
+        resultado += "Paso a paso:\n";
         int paso = 1;
         int colaIndex = 0;
 
@@ -90,8 +89,8 @@ public class Graph {
             colaIndex++;
             recorrido.add(actual);
 
-            resultado.append(paso++).append(". Visitando: ").append(actual).append("\n");
-            resultado.append("   Vecinos: ");
+            resultado += paso++ + ". Visitando: " + actual + "\n";
+            resultado += "   Vecinos: ";
 
             boolean tieneVecinos = false;
             GraphNode nodoActual = getNode(actual);
@@ -103,27 +102,27 @@ public class Graph {
                     if (!visitado.contains(vecino)) {
                         cola.add(vecino);
                         visitado.add(vecino);
-                        resultado.append(vecino).append(" (agregado) ");
+                        resultado += vecino + " (agregado) ";
                     } else {
-                        resultado.append(vecino).append(" (ya visitado) ");
+                        resultado += vecino + " (ya visitado) ";
                     }
                 }
             }
 
             if (!tieneVecinos) {
-                resultado.append("ninguno");
+                resultado += "ninguno";
             }
-            resultado.append("\n\n");
+            resultado += "\n\n";
         }
 
-        resultado.append("Orden de recorrido completo: ");
+        resultado += "Orden de recorrido completo: ";
         for (int i = 0; i < recorrido.getSize(); i++) {
-            resultado.append(recorrido.get(i));
-            if (i < recorrido.getSize() - 1) resultado.append(" → ");
+            resultado += recorrido.get(i);
+            if (i < recorrido.getSize() - 1) resultado += " → ";
         }
-        resultado.append("\n");
+        resultado += "\n";
 
-        return resultado.toString();
+        return resultado;
     }
     
     public Path shortestPath(String from, String to) {
@@ -257,17 +256,17 @@ public class Graph {
 
     public Path calcularRutaDijkstra(String inicio, String fin) {
         Path resultado = new Path();
-        StringBuilder detalle = new StringBuilder();
+        String detalle = "";
 
         if (!hasNode(inicio) || !hasNode(fin)) {
             resultado.detalleAlgoritmo = "Nodo no encontrado en el mapa";
             return resultado;
         }
 
-        detalle.append("═══════════════════════════════════════\n");
-        detalle.append("     ALGORITMO DIJKSTRA - BÚSQUEDA DE RUTA ÓPTIMA\n");
-        detalle.append("═══════════════════════════════════════\n\n");
-        detalle.append("Origen: ").append(inicio).append("  →  Destino: ").append(fin).append("\n\n");
+        detalle += "═══════════════════════════════════════\n";
+        detalle += "     ALGORITMO DIJKSTRA - BÚSQUEDA DE RUTA ÓPTIMA\n";
+        detalle += "═══════════════════════════════════════\n\n";
+        detalle += "Origen: " + inicio + "  →  Destino: " + fin + "\n\n";
 
         int total = nodes.getSize();
         int[] distancia = new int[total];
@@ -283,13 +282,13 @@ public class Graph {
         int inicioIndex = getNodeIndex(inicio);
         distancia[inicioIndex] = 0;
 
-        detalle.append("PASO 1: Inicializar\n");
-        detalle.append("────────────────────\n");
-        detalle.append("  • Distancia[").append(inicio).append("] = 0\n");
-        detalle.append("  • Resto de nodos = ∞\n\n");
+        detalle += "PASO 1: Inicializar\n";
+        detalle += "────────────────────\n";
+        detalle += "  • Distancia[" + inicio + "] = 0\n";
+        detalle += "  • Resto de nodos = ∞\n\n";
 
-        detalle.append("PASO 2: Procesar nodos\n");
-        detalle.append("────────────────────\n");
+        detalle += "PASO 2: Procesar nodos\n";
+        detalle += "────────────────────\n";
         
         int paso = 1;
         for (int count = 0; count < total; count++) {
@@ -308,11 +307,10 @@ public class Graph {
             String nodoActual = getNode(minIndex).getName();
             visitado[minIndex] = true;
 
-            detalle.append("  ").append(paso++).append(". Nodo: ").append(nodoActual)
-                   .append(" (distancia: ").append(distancia[minIndex]).append(")\n");
+            detalle += "  " + paso++ + ". Nodo: " + nodoActual + " (distancia: " + distancia[minIndex] + ")\n";
 
             if (nodoActual.equals(fin)) {
-                detalle.append("     DESTINO ALCANZADO!\n\n");
+                detalle += "     DESTINO ALCANZADO!\n\n";
                 break;
             }
 
@@ -336,8 +334,8 @@ public class Graph {
             }
         }
 
-        detalle.append("\nPASO 3: Reconstruir ruta\n");
-        detalle.append("────────────────────\n");
+        detalle += "\nPASO 3: Reconstruir ruta\n";
+        detalle += "────────────────────\n";
         int finIndex = getNodeIndex(fin);
         if (finIndex >= 0 && distancia[finIndex] != Integer.MAX_VALUE) {
             StringList camino = new StringList();
@@ -350,19 +348,19 @@ public class Graph {
             resultado.camino = camino;
             resultado.distanciaTotal = distancia[finIndex];
 
-            detalle.append("  Ruta óptima: ");
+            detalle += "  Ruta óptima: ";
             for (int i = 0; i < camino.getSize(); i++) {
-                detalle.append(camino.get(i));
-                if (i < camino.getSize() - 1) detalle.append(" → ");
+                detalle += camino.get(i);
+                if (i < camino.getSize() - 1) detalle += " → ";
             }
-            detalle.append("\n  Distancia total: ").append(resultado.distanciaTotal).append(" unidades\n");
-            detalle.append("\n═══════════════════════════════════════\n");
+            detalle += "\n  Distancia total: " + resultado.distanciaTotal + " unidades\n";
+            detalle += "\n═══════════════════════════════════════\n";
         } else {
-            detalle.append("  No se encontró un camino válido\n");
-            detalle.append("═══════════════════════════════════════\n");
+            detalle += "  No se encontró un camino válido\n";
+            detalle += "═══════════════════════════════════════\n";
         }
 
-        resultado.detalleAlgoritmo = detalle.toString();
+        resultado.detalleAlgoritmo = detalle;
         return resultado;
     }
 
@@ -417,21 +415,21 @@ public class Graph {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Graph{\n");
+        String result = "Graph{\n";
         for (int i = 0; i < nodes.getSize(); i++) {
             GraphNode node = nodes.get(i);
             if (node != null) {
-                sb.append("  ").append(node.getName()).append(" -> ");
+                result += "  " + node.getName() + " -> ";
                 String[] neighbors = node.getNeighbors();
                 for (int j = 0; j < neighbors.length; j++) {
                     if (neighbors[j] != null) {
-                        sb.append(neighbors[j]).append(" ");
+                        result += neighbors[j] + " ";
                     }
                 }
-                sb.append("\n");
+                result += "\n";
             }
         }
-        sb.append("}");
-        return sb.toString();
+        result += "}";
+        return result;
     }
 }

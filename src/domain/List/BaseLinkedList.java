@@ -1,16 +1,6 @@
 package domain.List;
 
 public class BaseLinkedList {
-    protected class Node {
-        protected Object data;
-        protected Node next;
-        
-        protected Node(Object data) {
-            this.data = data;
-            this.next = null;
-        }
-    }
-    
     protected Node head;
     protected int size;
     

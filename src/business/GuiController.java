@@ -41,50 +41,50 @@ public class GuiController {
     public String obtenerColasReporte() {
         domain.List.RequestQueue colaUrgente = requestController.obtenerColaUrgente();
         domain.List.RequestQueue colaNormal = requestController.obtenerColaNormal();
-        StringBuilder resultado = new StringBuilder();
+        String resultado = "";
 
-        resultado.append("=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n");
+        resultado += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
 
-        resultado.append("[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n");
-        resultado.append("Tamaño: ").append(colaUrgente.getSize()).append("\n");
+        resultado += "[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n";
+        resultado += "Tamaño: " + colaUrgente.getSize() + "\n";
         if (colaUrgente.isEmpty()) {
-            resultado.append("  [Vacía]\n");
+            resultado += "  [Vacía]\n";
         } else {
             int index = 1;
-            for (Request req : colaUrgente.getAll()) {
-                resultado.append("  ").append(index++).append(". ");
-                resultado.append("ID: ").append(req.getId());
-                resultado.append(" | Cliente: ").append(req.getClientName());
-                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Categoría: Emergencia");
-                resultado.append("\n");
+            for (int i = 0; i < colaUrgente.getSize(); i++) {
+                Request req = colaUrgente.get(i);
+                resultado += "  " + index++ + ". ";
+                resultado += "ID: " + req.getId();
+                resultado += " | Cliente: " + req.getClientName();
+                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
+                resultado += " | Categoría: Emergencia";
+                resultado += "\n";
             }
         }
 
-        resultado.append("\n");
+        resultado += "\n";
 
-        resultado.append("[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n");
-        resultado.append("Tamaño: ").append(colaNormal.getSize()).append("\n");
+        resultado += "[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n";
+        resultado += "Tamaño: " + colaNormal.getSize() + "\n";
         if (colaNormal.isEmpty()) {
-            resultado.append("  [Vacía]\n");
+            resultado += "  [Vacía]\n";
         } else {
             int index = 1;
-            for (Request req : colaNormal.getAll()) {
+            for (int i = 0; i < colaNormal.getSize(); i++) {
+                Request req = colaNormal.get(i);
                 String categoria = obtenerNombreCategoria(req.getClientCategory());
-                resultado.append("  ").append(index++).append(". ");
-                resultado.append("ID: ").append(req.getId());
-                resultado.append(" | Cliente: ").append(req.getClientName());
-                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Categoría: ").append(categoria);
-                resultado.append("\n");
+                resultado += "  " + index++ + ". ";
+                resultado += "ID: " + req.getId();
+                resultado += " | Cliente: " + req.getClientName();
+                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
+                resultado += " | Categoría: " + categoria;
+                resultado += "\n";
             }
         }
 
-        resultado.append("\nTotal de solicitudes pendientes: ")
-            .append(colaUrgente.getSize() + colaNormal.getSize())
-            .append("\n");
+        resultado += "\nTotal de solicitudes pendientes: " + (colaUrgente.getSize() + colaNormal.getSize()) + "\n";
 
-        return resultado.toString();
+        return resultado;
     }
 
     public ServiceList obtenerServiciosCompletados() {
