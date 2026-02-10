@@ -161,8 +161,8 @@ public class RequestController {
 			return null;
 		}
 
-		Path vehicleRoute = utils.mapa.calcularRutaDijkstra(vehicle.getCurrentZone(), request.getOrigin());
-		Path clientRoute = utils.mapa.calcularRutaDijkstra(request.getOrigin(), request.getDestination());
+		Path vehicleRoute = utils.mapa.dijkstra(vehicle.getCurrentZone(), request.getOrigin());
+		Path clientRoute = utils.mapa.dijkstra(request.getOrigin(), request.getDestination());
 
 		int totalDistance = vehicleRoute.distance + clientRoute.distance;
 

@@ -43,50 +43,41 @@ public class GuiController {
     public String getQueuesReport() {
         RequestQueue urgentQueue = requestController.getUrgentQueue();
         RequestQueue normalQueue = requestController.getNormalQueue();
-        String result = "";
+        StringBuilder sb = new StringBuilder();
 
-        result += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
+        sb.append("SOLICITUDES PENDIENTES\n");
+        sb.append("================================\n\n");
 
-        result += "[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n";
-        result += "Tamaño: " + urgentQueue.getSize() + "\n";
+        sb.append("URGENTES (Emergencia):\n");
         if (urgentQueue.isEmpty()) {
-            result += "  [Vacía]\n";
+            sb.append("  Ninguna\n");
         } else {
-            int index = 1;
             for (int i = 0; i < urgentQueue.getSize(); i++) {
                 Request req = urgentQueue.get(i);
-                result += "  " + index++ + ". ";
-                result += "ID: " + req.getId();
-                result += " | Cliente: " + req.getClientName();
-                result += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                result += " | Categoría: Emergencia";
-                result += "\n";
+                sb.append("  ").append(i+1).append(". ").append(req.getClientName())
+                  .append(" | ").append(req.getOrigin()).append(" -> ")
+                  .append(req.getDestination()).append("\n");
             }
         }
 
-        result += "\n";
-
-        result += "[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n";
-        result += "Tamaño: " + normalQueue.getSize() + "\n";
+        sb.append("\nNORMALES (por prioridad):\n");
         if (normalQueue.isEmpty()) {
-            result += "  [Vacía]\n";
+            sb.append("  Ninguna\n");
         } else {
-            int index = 1;
             for (int i = 0; i < normalQueue.getSize(); i++) {
                 Request req = normalQueue.get(i);
                 String category = Utils.getCategoryName(req.getClientCategory());
-                result += "  " + index++ + ". ";
-                result += "ID: " + req.getId();
-                result += " | Cliente: " + req.getClientName();
-                result += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                result += " | Categoría: " + category;
-                result += "\n";
+                sb.append("  ").append(i+1).append(". ").append(req.getClientName())
+                  .append(" (").append(category).append(") | ")
+                  .append(req.getOrigin()).append(" -> ")
+                  .append(req.getDestination()).append("\n");
             }
         }
 
-        result += "\nTotal de solicitudes pendientes: " + (urgentQueue.getSize() + normalQueue.getSize()) + "\n";
+        sb.append("\nTotal: ").append(urgentQueue.getSize() + normalQueue.getSize())
+          .append(" solicitudes\n");
 
-        return result;
+        return sb.toString();
     }
 
     public ServiceList getCompletedServices() {
@@ -95,6 +86,52 @@ public class GuiController {
     
     public StringList getAvailableNodes() {
         return requestController.getAvailableNodes();
+    }
+    
+    public String getVehiclesReport() {
+        VehicleList vehicles = getSortedVehiclesQuickSort();
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("VEHICULOS DISPONIBLES (Ordenados por servicios)\n");
+        sb.append("================================\n\n");
+        
+        for (int i = 0; i < vehicles.getSize(); i++) {
+            domain.Vehicle v = vehicles.get(i);
+            String status = v.isAvailable() ? "Disponible" : "En servicio";
+            sb.append(v.getId()).append(" | Zona: ").append(v.getCurrentZone())
+              .append(" | Conductor: ").append(v.getDriverName())
+              .append(" | Tipo: ").append(v.getVehicleType())
+              .append(" | Servicios: ").append(v.getServiceCount())
+              .append(" | Estado: ").append(status).append("\n");
+        }
+        
+        return sb.toString();
+    }
+    
+    public String getCompletedServicesReport() {
+        ServiceList services = getCompletedServices();
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("SERVICIOS COMPLETADOS\n");
+        sb.append("================================\n\n");
+        
+        if (services.getSize() == 0) {
+            sb.append("Ninguno\n");
+        } else {
+            for (int i = 0; i < services.getSize(); i++) {
+                Service service = services.get(i);
+                sb.append("SERVICIO #").append(service.id).append("\n");
+                sb.append("  Cliente: ").append(service.request.getClientName()).append("\n");
+                sb.append("  Ruta: ").append(service.request.getOrigin())
+                  .append(" -> ").append(service.request.getDestination()).append("\n");
+                sb.append("  Vehiculo: ").append(service.vehicle.getId()).append("\n");
+                sb.append("  Costo: $").append(String.format("%.2f", service.cost)).append("\n");
+                sb.append("  Distancia: ").append(String.join(" -> ", service.clientToDestinationRoute.split(" -> ")))
+                  .append("\n\n");
+            }
+        }
+        
+        return sb.toString();
     }
     
     
@@ -108,5 +145,32 @@ public class GuiController {
     
     public StringList getHistory() {
         return requestController.getHistory();
+    }
+    
+    public String displayServiceDetails(Service service) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=====================================================\n");
+        sb.append("SERVICIO #").append(service.id).append(" COMPLETADO\n");
+        sb.append("=====================================================\n\n");
+        
+        sb.append("INFORMACIÓN GENERAL:\n");
+        sb.append("  Cliente: ").append(service.request.getClientName()).append("\n");
+        sb.append("  Vehículo: ").append(service.vehicle.getId())
+          .append(" (Zona: ").append(service.vehicle.getCurrentZone()).append(")\n");
+        sb.append("  Ruta: ").append(service.request.getOrigin())
+          .append(" -> ").append(service.request.getDestination()).append("\n");
+        sb.append("  Costo Total: $").append(String.format("%.2f", service.cost)).append("\n\n");
+        
+        sb.append("RUTA DEL VEHÍCULO AL CLIENTE:\n");
+        sb.append("  ").append(service.vehicleToClientRoute).append("\n\n");
+        
+        sb.append("RUTA DEL CLIENTE AL DESTINO:\n");
+        sb.append("  ").append(service.clientToDestinationRoute).append("\n\n");
+        
+        sb.append("DETALLE DEL ALGORITMO\n");
+        sb.append("=====================================================\n\n");
+        sb.append(service.algorithmDetail);
+        
+        return sb.toString();
     }
 }
