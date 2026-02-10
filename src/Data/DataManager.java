@@ -5,6 +5,8 @@ import domain.Graphs.Edge;
 import domain.Graphs.Graph;
 import domain.List.VehicleList;
 import domain.List.StringList;
+import domain.List.RequestQueue;
+import domain.List.ServiceList;
 
 public class DataManager {
     
@@ -52,9 +54,9 @@ public class DataManager {
         return lista;
     }
     
-    public void guardarSolicitudes(domain.List.RequestQueue solicitudes, String archivo) {
+    public void guardarSolicitudes(RequestQueue solicitudes, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
-            domain.List.RequestQueue queue = solicitudes.getAll();
+            RequestQueue queue = solicitudes.getAll();
             for (int i = 0; i < queue.getSize(); i++) {
                 Request s = queue.get(i);
                 writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
@@ -64,9 +66,9 @@ public class DataManager {
         }
     }
     
-    public void guardarServicios(domain.List.ServiceList servicios, String archivo) {
+    public void guardarServicios(ServiceList servicios, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
-            domain.List.ServiceList serviceList = servicios.getAll();
+            ServiceList serviceList = servicios.getAll();
             for (int i = 0; i < serviceList.getSize(); i++) {
                 Service s = serviceList.get(i);
                 writer.println(s.id + "," + s.request.getId() + "," + s.vehicle.getId() + "," + s.route + "," + s.cost);

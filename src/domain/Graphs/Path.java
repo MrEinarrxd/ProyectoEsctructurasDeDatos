@@ -10,9 +10,7 @@ public class Path {
     public int distanciaTotal;
     public String detalleAlgoritmo;
     
-    /**
-     * Constructor with path and distance information
-     */
+    // Constructor principal
     public Path(int distance, StringList path) {
         this.distance = distance;
         this.path = path;
@@ -25,9 +23,7 @@ public class Path {
         }
     }
     
-    /**
-     * Empty constructor
-     */
+    // Constructor vacío
     public Path() {
         this.distance = 0;
         this.path = new StringList();

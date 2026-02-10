@@ -7,10 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.Date;
-import domain.List.StringList;
-import domain.List.ServiceList;
-import domain.List.VehicleList;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -22,10 +18,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-
 import business.GuiController;
 import domain.Service;
+import domain.List.StringList;
+import domain.List.ServiceList;
+import domain.List.VehicleList;
 
 public class TranspoRouteGUI extends JFrame {
     private final GuiController controller;
@@ -36,13 +33,12 @@ public class TranspoRouteGUI extends JFrame {
     private int reporteUpdateCount = 0;
 
     // Paleta de colores moderna
-    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);      // Azul principal
-    private static final Color SUCCESS_COLOR = new Color(39, 174, 96);       // Verde éxito
-    private static final Color DANGER_COLOR = new Color(231, 76, 60);        // Rojo peligro
-    private static final Color BACKGROUND_COLOR = new Color(236, 240, 241);  // Gris claro
-    private static final Color PANEL_BG = new Color(255, 255, 255);          // Blanco
-    private static final Color TEXT_AREA_BG = new Color(250, 250, 250);      // Gris muy claro
-    private static final Color BORDER_COLOR = new Color(189, 195, 199);      // Gris borde
+    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
+    private static final Color SUCCESS_COLOR = new Color(39, 174, 96);
+    private static final Color BACKGROUND_COLOR = new Color(236, 240, 241);
+    private static final Color PANEL_BG = new Color(255, 255, 255);
+    private static final Color TEXT_AREA_BG = new Color(250, 250, 250);
+    private static final Color BORDER_COLOR = new Color(189, 195, 199);
     
     // Fuentes
     private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 14);
