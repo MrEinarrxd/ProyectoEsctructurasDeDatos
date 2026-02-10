@@ -1,12 +1,10 @@
 package domain.List;
 
-import java.util.List;
-import java.util.ArrayList;
 import domain.Request;
 
 public class RequestQueue {
-    private NodeRequest front;
-    private NodeRequest rear;
+    private RequestNode front;
+    private RequestNode rear;
     private int size;
     
     public RequestQueue() {
@@ -16,7 +14,7 @@ public class RequestQueue {
     }
     
     public void enqueue(Request request) {
-        NodeRequest newNode = new NodeRequest(request);
+        RequestNode newNode = new RequestNode(request);
         
         if (isEmpty()) {
             front = newNode;
@@ -59,14 +57,25 @@ public class RequestQueue {
         return size;
     }
     
-    public List<Request> getAll() {
-        List<Request> list = new ArrayList<>();
-        NodeRequest current = front;
-        while (current != null) {
-            list.add(current.getData());
+    public Request get(int index) {
+        if (index < 0 || index >= size) {
+            return null;
+        }
+        RequestNode current = front;
+        for (int i = 0; i < index; i++) {
             current = current.getNext();
         }
-        return list;
+        return current.getData();
+    }
+    
+    public RequestQueue getAll() {
+        RequestQueue queue = new RequestQueue();
+        RequestNode current = front;
+        while (current != null) {
+            queue.enqueue(current.getData());
+            current = current.getNext();
+        }
+        return queue;
     }
     
     public void clear() {
@@ -81,18 +90,18 @@ public class RequestQueue {
             return "Queue: []";
         }
         
-        StringBuilder sb = new StringBuilder("Queue: [");
-        NodeRequest current = front;
+        String result = "Queue: [";
+        RequestNode current = front;
         
         while (current != null) {
-            sb.append(current.getData());
+            result += current.getData();
             if (current.getNext() != null) {
-                sb.append(" -> ");
+                result += " -> ";
             }
             current = current.getNext();
         }
         
-        sb.append("]");
-        return sb.toString();
+        result += "]";
+        return result;
     }
 }

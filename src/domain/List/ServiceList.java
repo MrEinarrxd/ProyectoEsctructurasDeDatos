@@ -13,8 +13,8 @@ public class ServiceList extends BaseLinkedList {
         return (Service) obj;
     }
     
-    public java.util.List<Service> getAll() {
-        java.util.List<Service> list = new java.util.ArrayList<>();
+    public ServiceList getAll() {
+        ServiceList list = new ServiceList();
         Node current = head;
         while (current != null) {
             list.add((Service) current.data);

@@ -13,158 +13,171 @@ import domain.Graphs.Edge;
 import domain.Graphs.Graph;
 
 public class GraphPanel extends JPanel {
-    private Graph grafo;
+    // Constantes de layout
+    private static final int PANEL_WIDTH = 900;
+    private static final int PANEL_HEIGHT = 600;
+    private static final int CENTER_X = PANEL_WIDTH / 2;
+    private static final int CENTER_Y = PANEL_HEIGHT / 2;
+    private static final int LAYOUT_RADIUS = 350;
+    private static final int FORCE_ITERATIONS = 100;
+    private static final double REPULSION_CONSTANT = 200.0;
+    private static final double DAMPING_FACTOR = 0.05;
+    private static final int NODE_RADIUS = 35;
+    private static final int EDGE_LABEL_OFFSET = 15;
+    private static final int MIN_POSITION = 50;
+    private static final int MAX_POSITION_X = 850;
+    private static final int MAX_POSITION_Y = 550;
+
     private Map<String, Point> posiciones;
+    private Map<String, List<Edge>> mapaAristas;
 
     public GraphPanel(Graph grafo) {
-        this.grafo = grafo;
         this.posiciones = new HashMap<>();
+        this.mapaAristas = grafo.obtenerMapaAristas();
         calcularPosiciones();
-        setPreferredSize(new Dimension(900, 600));
+        setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
     }
 
-    /**
-     * Calcula las posiciones iniciales de los nodos del grafo.
-     * ALGORITMO:
-     * 1. Distribuye nodos en círculo (layout inicial)
-     * 2. Aplica algoritmo force-directed para optimizar visualización
-     */
     private void calcularPosiciones() {
-        Map<String, List<Edge>> mapa = grafo.getEdgeMap();
-        
         // Si no hay nodos, no hacer nada
-        if (mapa.isEmpty()) {
+        if (mapaAristas.isEmpty()) {
             return;
         }
         
-        // Obtener todos los nodos únicos del grafo
+        // Obtener todos los nodos únicos
         Set<String> nodos = new HashSet<>();
-        for (String nodo : mapa.keySet()) {
+        for (String nodo : mapaAristas.keySet()) {
             nodos.add(nodo);
-            for (Edge edge : mapa.get(nodo)) {
+            for (Edge edge : mapaAristas.get(nodo)) {
                 nodos.add(edge.getTo());
             }
         }
         
-        // Inicializar posiciones en círculo (distribución uniforme)
-        int centerX = 450;
-        int centerY = 300;
-        int radius = 350;
-        
+        // Inicializar posiciones en círculo
         int totalNodos = nodos.size();
         int index = 0;
         for (String nodo : nodos) {
             double angulo = (2 * Math.PI * index) / totalNodos;
-            int x = centerX + (int) (radius * Math.cos(angulo));
-            int y = centerY + (int) (radius * Math.sin(angulo));
+            int x = CENTER_X + (int) (LAYOUT_RADIUS * Math.cos(angulo));
+            int y = CENTER_Y + (int) (LAYOUT_RADIUS * Math.sin(angulo));
             posiciones.put(nodo, new Point(x, y));
             index++;
         }
         
-        // Aplicar algoritmo force-directed (spring layout) para optimizar visualización
-        // Reduce cruces de aristas y mejora la estética del grafo
-        aplicarForceDirectedLayout(mapa, nodos, 100);
+        // Aplicar algoritmo force-directed (spring layout)
+        aplicarForceDirectedLayout(nodos);
     }
     
-    /**
-     * Aplica algoritmo Force-Directed Layout (Spring Layout) para optimizar posiciones.
-     * PRINCIPIO FÍSICO:
-     * - Nodos se repelen entre sí (como cargas eléctricas del mismo signo)
-     * - Aristas atraen sus nodos conectados (como resortes)
-     * - Sistema converge a equilibrio de fuerzas
-     * Esto minimiza cruces de aristas y distribuye nodos uniformemente.
-     * @param mapa Mapa de adyacencias del grafo
-     * @param nodos Conjunto de nodos del grafo
-     * @param iteraciones Número de iteraciones para convergencia
-     */
-    private void aplicarForceDirectedLayout(Map<String, List<Edge>> mapa, Set<String> nodos, int iteraciones) {
+    private void aplicarForceDirectedLayout(Set<String> nodos) {
         Map<String, double[]> velocidades = new HashMap<>();
         Map<String, double[]> fuerzas = new HashMap<>();
         
-        // Inicializar velocidades en cero para todos los nodos
+        // Inicializar velocidades en cero
         for (String nodo : nodos) {
             velocidades.put(nodo, new double[]{0, 0});
         }
         
-        double k = 200.0;  // Constante de repulsión
-        double c = 0.05;  // Factor de amortiguación
-        
-        for (int iter = 0; iter < iteraciones; iter++) {
+        for (int iter = 0; iter < FORCE_ITERATIONS; iter++) {
             // Reinicializar fuerzas
             for (String nodo : nodos) {
                 fuerzas.put(nodo, new double[]{0, 0});
             }
             
-            // Repulsión entre nodos (todos se repelen)
-            String[] nodosArray = nodos.toArray(new String[0]);
-            for (int i = 0; i < nodosArray.length; i++) {
-                for (int j = i + 1; j < nodosArray.length; j++) {
-                    String n1 = nodosArray[i];
-                    String n2 = nodosArray[j];
+            // Repulsión entre nodos
+            aplicarRepulsion(nodos, fuerzas);
+            
+            // Atracción por aristas (muelles)
+            aplicarAtraccion(fuerzas);
+            
+            // Actualizar posiciones
+            actualizarPosiciones(nodos, velocidades, fuerzas);
+        }
+    }
+
+    private void aplicarRepulsion(Set<String> nodos, Map<String, double[]> fuerzas) {
+        String[] nodosArray = nodos.toArray(new String[0]);
+        for (int i = 0; i < nodosArray.length; i++) {
+            for (int j = i + 1; j < nodosArray.length; j++) {
+                String n1 = nodosArray[i];
+                String n2 = nodosArray[j];
+                
+                Point p1 = posiciones.get(n1);
+                Point p2 = posiciones.get(n2);
+                
+                double dx = p2.x - p1.x;
+                double dy = p2.y - p1.y;
+                double dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 1) {
+                    double force = REPULSION_CONSTANT / dist;
+                    double fx = (dx / dist) * force;
+                    double fy = (dy / dist) * force;
                     
-                    Point p1 = posiciones.get(n1);
-                    Point p2 = posiciones.get(n2);
+                    fuerzas.get(n1)[0] -= fx;
+                    fuerzas.get(n1)[1] -= fy;
+                    fuerzas.get(n2)[0] += fx;
+                    fuerzas.get(n2)[1] += fy;
+                }
+            }
+        }
+    }
+
+    private void aplicarAtraccion(Map<String, double[]> fuerzas) {
+        double restLength = 300;
+        for (String origen : mapaAristas.keySet()) {
+            for (Edge edge : mapaAristas.get(origen)) {
+                String destino = edge.getTo();
+                if (posiciones.containsKey(destino)) {
+                    Point p1 = posiciones.get(origen);
+                    Point p2 = posiciones.get(destino);
                     
                     double dx = p2.x - p1.x;
                     double dy = p2.y - p1.y;
                     double dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist > 1) {
-                        double force = k / dist;
+                    if (dist > 0.1) {
+                        double force = 0.01 * (dist - restLength);
                         double fx = (dx / dist) * force;
                         double fy = (dy / dist) * force;
                         
-                        // Repulsión (inversa)
-                        fuerzas.get(n1)[0] -= fx;
-                        fuerzas.get(n1)[1] -= fy;
-                        fuerzas.get(n2)[0] += fx;
-                        fuerzas.get(n2)[1] += fy;
+                        fuerzas.get(origen)[0] += fx;
+                        fuerzas.get(origen)[1] += fy;
+                        fuerzas.get(destino)[0] -= fx;
+                        fuerzas.get(destino)[1] -= fy;
                     }
                 }
-            }
-            
-            // Atracción por aristas (muelles)
-            for (String origen : mapa.keySet()) {
-                for (Edge edge : mapa.get(origen)) {
-                    String destino = edge.getTo();
-                    if (posiciones.containsKey(destino)) {
-                        Point p1 = posiciones.get(origen);
-                        Point p2 = posiciones.get(destino);
-                        
-                        double dx = p2.x - p1.x;
-                        double dy = p2.y - p1.y;
-                        double dist = Math.sqrt(dx * dx + dy * dy);
-                        
-                        double restLength = 300;
-                        if (dist > 0.1) {
-                            double force = 0.01 * (dist - restLength);
-                            double fx = (dx / dist) * force;
-                            double fy = (dy / dist) * force;
-                            
-                            fuerzas.get(origen)[0] += fx;
-                            fuerzas.get(origen)[1] += fy;
-                            fuerzas.get(destino)[0] -= fx;
-                            fuerzas.get(destino)[1] -= fy;
-                        }
-                    }
-                }
-            }
-            
-            // Actualizar posiciones
-            for (String nodo : nodos) {
-                double[] vel = velocidades.get(nodo);
-                double[] fuerza = fuerzas.get(nodo);
-                Point pos = posiciones.get(nodo);
-                
-                vel[0] = (vel[0] + fuerza[0]) * (1 - c);
-                vel[1] = (vel[1] + fuerza[1]) * (1 - c);
-                
-                int newX = Math.max(50, Math.min(850, (int)(pos.x + vel[0])));
-                int newY = Math.max(50, Math.min(550, (int)(pos.y + vel[1])));
-                
-                posiciones.put(nodo, new Point(newX, newY));
             }
         }
+    }
+
+    private void actualizarPosiciones(Set<String> nodos, Map<String, double[]> velocidades, Map<String, double[]> fuerzas) {
+        for (String nodo : nodos) {
+            double[] vel = velocidades.get(nodo);
+            double[] fuerza = fuerzas.get(nodo);
+            Point pos = posiciones.get(nodo);
+            
+            vel[0] = (vel[0] + fuerza[0]) * (1 - DAMPING_FACTOR);
+            vel[1] = (vel[1] + fuerza[1]) * (1 - DAMPING_FACTOR);
+            
+            int newX = Math.max(MIN_POSITION, Math.min(MAX_POSITION_X, (int)(pos.x + vel[0])));
+            int newY = Math.max(MIN_POSITION, Math.min(MAX_POSITION_Y, (int)(pos.y + vel[1])));
+            
+            posiciones.put(nodo, new Point(newX, newY));
+        }
+    }
+
+    private int obtenerPesoMaximo() {
+        int max = 1;
+        for (List<Edge> edges : mapaAristas.values()) {
+            for (Edge edge : edges) {
+                max = Math.max(max, edge.getWeight());
+            }
+        }
+        return max;
+    }
+
+    private String crearClaveArista(String n1, String n2) {
+        return n1.compareTo(n2) < 0 ? n1 + "||" + n2 : n2 + "||" + n1;
     }
 
     @Override
@@ -174,32 +187,20 @@ public class GraphPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                            RenderingHints.VALUE_ANTIALIAS_ON);
 
-        Map<String, List<Edge>> mapa = grafo.getEdgeMap();
         Set<String> aristasDibujadas = new HashSet<>();
         Map<String, Integer> distancias = new HashMap<>();
-        int pesoMaximo = 1;
-
-        // Encontrar el peso máximo para escalar colores
-        for (String origen : mapa.keySet()) {
-            for (Edge arista : mapa.get(origen)) {
-                if (arista.getWeight() > pesoMaximo) {
-                    pesoMaximo = arista.getWeight();
-                }
-            }
-        }
+        int pesoMaximo = obtenerPesoMaximo();
 
         // Dibujar aristas con colores según peso
-        for (String origen : mapa.keySet()) {
+        for (String origen : mapaAristas.keySet()) {
             Point p1 = posiciones.get(origen);
             if (p1 == null) continue;
 
-            for (Edge arista : mapa.get(origen)) {
+            for (Edge arista : mapaAristas.get(origen)) {
                 Point p2 = posiciones.get(arista.getTo());
                 if (p2 == null) continue;
 
-                String clave = origen.compareTo(arista.getTo()) < 0 
-                    ? origen + "||" + arista.getTo() 
-                    : arista.getTo() + "||" + origen;
+                String clave = crearClaveArista(origen, arista.getTo());
                 
                 if (aristasDibujadas.contains(clave)) continue;
                 aristasDibujadas.add(clave);
@@ -232,8 +233,8 @@ public class GraphPanel extends JPanel {
                     
                     int perpX = 0, perpY = 0;
                     if (length > 0) {
-                        perpX = (-dy * 15) / length;
-                        perpY = (dx * 15) / length;
+                        perpX = (-dy * EDGE_LABEL_OFFSET) / length;
+                        perpY = (dx * EDGE_LABEL_OFFSET) / length;
                     }
                     
                     // Fondo blanco para el texto
@@ -259,12 +260,11 @@ public class GraphPanel extends JPanel {
         // Dibujar nodos
         for (Map.Entry<String, Point> entry : posiciones.entrySet()) {
             Point p = entry.getValue();
-            int radius = 35;
             g2d.setColor(Color.BLUE);
-            g2d.fillOval(p.x - radius, p.y - radius, radius * 2, radius * 2);
+            g2d.fillOval(p.x - NODE_RADIUS, p.y - NODE_RADIUS, NODE_RADIUS * 2, NODE_RADIUS * 2);
             g2d.setColor(Color.WHITE);
             g2d.setStroke(new BasicStroke(2));
-            g2d.drawOval(p.x - radius, p.y - radius, radius * 2, radius * 2);
+            g2d.drawOval(p.x - NODE_RADIUS, p.y - NODE_RADIUS, NODE_RADIUS * 2, NODE_RADIUS * 2);
             
             String nombre = entry.getKey();
             FontMetrics fm = g2d.getFontMetrics();

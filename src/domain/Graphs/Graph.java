@@ -64,72 +64,65 @@ public class Graph {
         return nodes.getSize();
     }
 
-    /**
-     * Búsqueda en Anchura (Breadth-First Search)
-     * Recorre el grafo nivel por nivel desde un nodo inicial.
-     * Usa una cola para procesar nodos en el orden que fueron descubiertos.
-     * Complejidad: O(V + E) donde V = vértices, E = aristas
-     */
-    public String bfs(String start) {
-        StringBuilder result = new StringBuilder();
-        result.append("=== EXPLORACIÓN BFS (Breadth-First Search) ===\n");
-        result.append("Inicio: ").append(start).append("\n\n");
+    public String bfs(String inicio) {
+        String resultado = "=== EXPLORACIÓN BFS (Breadth-First Search) ===\n";
+        resultado += "Inicio: " + inicio + "\n\n";
 
-        if (!hasNode(start)) {
-            result.append("Error: Nodo no encontrado\n");
-            return result.toString();
+        if (!hasNode(inicio)) {
+            resultado += "Error: Nodo no encontrado\n";
+            return resultado;
         }
 
-        StringList queue = new StringList();
-        StringList visited = new StringList();
-        StringList traversal = new StringList();
+        StringList cola = new StringList();
+        StringList visitado = new StringList();
+        StringList recorrido = new StringList();
 
-        queue.add(start);
-        visited.add(start);
+        cola.add(inicio);
+        visitado.add(inicio);
 
-        result.append("Paso a paso:\n");
-        int step = 1;
-        int queueIndex = 0;
+        resultado += "Paso a paso:\n";
+        int paso = 1;
+        int colaIndex = 0;
 
-        while (queueIndex < queue.getSize()) {
-            String current = queue.get(queueIndex);
-            queueIndex++;
-            traversal.add(current);
+        while (colaIndex < cola.getSize()) {
+            String actual = cola.get(colaIndex);
+            colaIndex++;
+            recorrido.add(actual);
 
-            result.append(step++).append(". Visitando: ").append(current).append("\n");
-            result.append("   Vecinos: ");
+            resultado += paso++ + ". Visitando: " + actual + "\n";
+            resultado += "   Vecinos: ";
 
-            boolean hasNeighbors = false;
-            GraphNode currentNode = getNode(current);
-            if (currentNode != null) {
-                String[] neighbors = currentNode.getNeighbors();
-                for (String neighbor : neighbors) {
-                    if (neighbor == null) continue;
-                    hasNeighbors = true;
-                    if (!visited.contains(neighbor)) {
-                        queue.add(neighbor);
-                        visited.add(neighbor);
-                        result.append(neighbor).append(" (agregado) ");
+            boolean tieneVecinos = false;
+            GraphNode nodoActual = getNode(actual);
+            if (nodoActual != null) {
+                String[] vecinos = nodoActual.getNeighbors();
+                for (String vecino : vecinos) {
+                    if (vecino == null) continue;
+                    tieneVecinos = true;
+                    if (!visitado.contains(vecino)) {
+                        cola.add(vecino);
+                        visitado.add(vecino);
+                        resultado += vecino + " (agregado) ";
                     } else {
-                        result.append(neighbor).append(" (ya visitado) ");
+                        resultado += vecino + " (ya visitado) ";
                     }
                 }
             }
 
-            if (!hasNeighbors) {
-                result.append("ninguno");
+            if (!tieneVecinos) {
+                resultado += "ninguno";
             }
-            result.append("\n\n");
+            resultado += "\n\n";
         }
 
-        result.append("Orden de recorrido completo: ");
-        for (int i = 0; i < traversal.getSize(); i++) {
-            result.append(traversal.get(i));
-            if (i < traversal.getSize() - 1) result.append(" → ");
+        resultado += "Orden de recorrido completo: ";
+        for (int i = 0; i < recorrido.getSize(); i++) {
+            resultado += recorrido.get(i);
+            if (i < recorrido.getSize() - 1) resultado += " → ";
         }
-        result.append("\n");
+        resultado += "\n";
 
-        return result.toString();
+        return resultado;
     }
     
     public Path shortestPath(String from, String to) {
@@ -261,125 +254,118 @@ public class Graph {
         return new Path(distance[targetIndex], path);
     }
 
-    /**
-     * Algoritmo de Dijkstra para encontrar la ruta más corta entre dos nodos.
-     * Usa una estrategia greedy: siempre explora el nodo no visitado con menor distancia.
-     * Mantiene un registro de distancias acumuladas y nodos previos para reconstruir la ruta.
-     * Complejidad: O(V²) donde V = cantidad de vértices (sin heap de prioridad)
-     */
-    public Path calculateDijkstraRoute(String start, String end) {
-        Path result = new Path();
-        StringBuilder detail = new StringBuilder();
+    public Path calcularRutaDijkstra(String inicio, String fin) {
+        Path resultado = new Path();
+        String detalle = "";
 
-        if (!hasNode(start) || !hasNode(end)) {
-            result.algorithmDetail = "Node not found in map";
-            return result;
+        if (!hasNode(inicio) || !hasNode(fin)) {
+            resultado.detalleAlgoritmo = "Nodo no encontrado en el mapa";
+            return resultado;
         }
 
-        detail.append("═══════════════════════════════════════\n");
-        detail.append("     ALGORITMO DIJKSTRA - BÚSQUEDA DE RUTA ÓPTIMA\n");
-        detail.append("═══════════════════════════════════════\n\n");
-        detail.append("Origen: ").append(start).append("  →  Destino: ").append(end).append("\n\n");
+        detalle += "═══════════════════════════════════════\n";
+        detalle += "     ALGORITMO DIJKSTRA - BÚSQUEDA DE RUTA ÓPTIMA\n";
+        detalle += "═══════════════════════════════════════\n\n";
+        detalle += "Origen: " + inicio + "  →  Destino: " + fin + "\n\n";
 
         int total = nodes.getSize();
-        int[] distance = new int[total];
-        boolean[] visited = new boolean[total];
-        String[] previous = new String[total];
+        int[] distancia = new int[total];
+        boolean[] visitado = new boolean[total];
+        String[] previos = new String[total];
 
         for (int i = 0; i < total; i++) {
-            distance[i] = Integer.MAX_VALUE;
-            visited[i] = false;
-            previous[i] = null;
+            distancia[i] = Integer.MAX_VALUE;
+            visitado[i] = false;
+            previos[i] = null;
         }
 
-        int startIndex = getNodeIndex(start);
-        distance[startIndex] = 0;
+        int inicioIndex = getNodeIndex(inicio);
+        distancia[inicioIndex] = 0;
 
-        detail.append("PASO 1: Inicializar\n");
-        detail.append("────────────────────\n");
-        detail.append("  • Distancia[").append(start).append("] = 0\n");
-        detail.append("  • Resto de nodos = ∞\n\n");
+        detalle += "PASO 1: Inicializar\n";
+        detalle += "────────────────────\n";
+        detalle += "  • Distancia[" + inicio + "] = 0\n";
+        detalle += "  • Resto de nodos = ∞\n\n";
 
-        detail.append("PASO 2: Procesar nodos\n");
-        detail.append("────────────────────\n");
+        detalle += "PASO 2: Procesar nodos\n";
+        detalle += "────────────────────\n";
         
-        int step = 1;
+        int paso = 1;
         for (int count = 0; count < total; count++) {
             int minDist = Integer.MAX_VALUE;
             int minIndex = -1;
 
             for (int i = 0; i < total; i++) {
-                if (!visited[i] && distance[i] < minDist) {
-                    minDist = distance[i];
+                if (!visitado[i] && distancia[i] < minDist) {
+                    minDist = distancia[i];
                     minIndex = i;
                 }
             }
 
             if (minIndex == -1) break;
 
-            String currentNode = getNode(minIndex).getName();
-            visited[minIndex] = true;
+            String nodoActual = getNode(minIndex).getName();
+            visitado[minIndex] = true;
 
-            detail.append("  ").append(step++).append(". Nodo: ").append(currentNode)
-                   .append(" (distancia: ").append(distance[minIndex]).append(")\n");
+            detalle += "  " + paso++ + ". Nodo: " + nodoActual + " (distancia: " + distancia[minIndex] + ")\n";
 
-            if (currentNode.equals(end)) {
-                detail.append("     DESTINO ALCANZADO!\n\n");
+            if (nodoActual.equals(fin)) {
+                detalle += "     DESTINO ALCANZADO!\n\n";
                 break;
             }
 
-            GraphNode currentGraphNode = getNode(currentNode);
-            EdgeList edges = currentGraphNode.getEdges();
+            GraphNode actualNode = getNode(nodoActual);
+            EdgeList edges = actualNode.getEdges();
             for (int i = 0; i < edges.getSize(); i++) {
                 Edge edge = (Edge) edges.get(i);
                 if (edge == null) continue;
 
-                String neighbor = edge.getTo();
-                int neighborIndex = getNodeIndex(neighbor);
-                if (neighborIndex < 0 || visited[neighborIndex]) continue;
+                String vecino = edge.getTo();
+                int vecinoIndex = getNodeIndex(vecino);
+                if (vecinoIndex < 0 || visitado[vecinoIndex]) continue;
 
-                int newDist = distance[minIndex] + edge.getWeight();
-                int currentDist = distance[neighborIndex];
+                int nuevaDist = distancia[minIndex] + edge.getWeight();
+                int distActual = distancia[vecinoIndex];
 
-                if (newDist < currentDist) {
-                    distance[neighborIndex] = newDist;
-                    previous[neighborIndex] = currentNode;
+                if (nuevaDist < distActual) {
+                    distancia[vecinoIndex] = nuevaDist;
+                    previos[vecinoIndex] = nodoActual;
                 }
             }
         }
 
-        detail.append("\nPASO 3: Reconstruir ruta\n");
-        detail.append("────────────────────\n");
-        int endIndex = getNodeIndex(end);
-        if (endIndex >= 0 && distance[endIndex] != Integer.MAX_VALUE) {
-            StringList pathList = new StringList();
-            String current = end;
-            while (current != null) {
-                pathList.addFirst(current);
-                current = previous[getNodeIndex(current)];
+        detalle += "\nPASO 3: Reconstruir ruta\n";
+        detalle += "────────────────────\n";
+        int finIndex = getNodeIndex(fin);
+        if (finIndex >= 0 && distancia[finIndex] != Integer.MAX_VALUE) {
+            StringList camino = new StringList();
+            String actual = fin;
+            while (actual != null) {
+                camino.addFirst(actual);
+                actual = previos[getNodeIndex(actual)];
             }
 
-            Path pathResult = new Path(distance[endIndex], pathList);
+            resultado.camino = camino;
+            resultado.distanciaTotal = distancia[finIndex];
 
-            detail.append("  Ruta óptima: ");
-            for (int i = 0; i < pathList.getSize(); i++) {
-                detail.append(pathList.get(i));
-                if (i < pathList.getSize() - 1) detail.append(" → ");
+            detalle += "  Ruta óptima: ";
+            for (int i = 0; i < camino.getSize(); i++) {
+                detalle += camino.get(i);
+                if (i < camino.getSize() - 1) detalle += " → ";
             }
-            detail.append("\n  Distancia total: ").append(distance[endIndex]).append(" unidades\n");
-            detail.append("\n═══════════════════════════════════════\n");
-            pathResult.algorithmDetail = detail.toString();
-            return pathResult;
+            detalle += "\n  Distancia total: " + resultado.distanciaTotal + " unidades\n";
+            detalle += "\n═══════════════════════════════════════\n";
         } else {
-            detail.append("  No se encontró un camino válido\n");
-            detail.append("═══════════════════════════════════════\n");
-            result.algorithmDetail = detail.toString();
-            return result;
+            detalle += "  No se encontró un camino válido\n";
+            detalle += "═══════════════════════════════════════\n";
         }
+
+        resultado.detalleAlgoritmo = detalle;
+        return resultado;
     }
 
-    public Map<String, List<Edge>> getEdgeMap() {
-        Map<String, List<Edge>> map = new HashMap<>();
+    public Map<String, List<Edge>> obtenerMapaAristas() {
+        Map<String, List<Edge>> mapa = new HashMap<>();
         for (int i = 0; i < nodes.getSize(); i++) {
             GraphNode node = nodes.get(i);
             if (node == null) continue;
@@ -392,9 +378,9 @@ public class Graph {
                     edges.add(new Edge(edge.getTo(), edge.getWeight()));
                 }
             }
-            map.put(node.getName(), edges);
+            mapa.put(node.getName(), edges);
         }
-        return map;
+        return mapa;
     }
     
     public GraphNode getNode(int index) {
@@ -429,21 +415,21 @@ public class Graph {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Graph{\n");
+        String result = "Graph{\n";
         for (int i = 0; i < nodes.getSize(); i++) {
             GraphNode node = nodes.get(i);
             if (node != null) {
-                sb.append("  ").append(node.getName()).append(" -> ");
+                result += "  " + node.getName() + " -> ";
                 String[] neighbors = node.getNeighbors();
                 for (int j = 0; j < neighbors.length; j++) {
                     if (neighbors[j] != null) {
-                        sb.append(neighbors[j]).append(" ");
+                        result += neighbors[j] + " ";
                     }
                 }
-                sb.append("\n");
+                result += "\n";
             }
         }
-        sb.append("}");
-        return sb.toString();
+        result += "}";
+        return result;
     }
 }

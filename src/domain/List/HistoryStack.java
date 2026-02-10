@@ -1,8 +1,5 @@
 package domain.List;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class HistoryStack extends BaseLinkedList {
 
     public void push(String item) {
@@ -23,8 +20,8 @@ public class HistoryStack extends BaseLinkedList {
         return isEmpty() ? null : (String) head.data;
     }
 
-    public List<String> getAll() {
-        List<String> list = new ArrayList<>();
+    public StringList getAll() {
+        StringList list = new StringList();
         Node current = head;
         while (current != null) {
             list.add((String) current.data);
