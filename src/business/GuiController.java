@@ -5,6 +5,7 @@ import domain.List.StringList;
 import domain.List.ServiceList;
 import domain.List.RequestQueue;
 import domain.Service;
+import domain.Utils;
 import domain.Request;
 import domain.Graphs.Graph;
 
@@ -15,106 +16,97 @@ public class GuiController {
         this.requestController = requestController;
     }
 
-    public Graph getMapa() {
+    public Graph getMap() {
         return requestController.getMap();
     }
 
-    public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
-        return requestController.registerRequest(cliente, origen, destino, prioridad);
+    public Request registerRequest(String clientName, String origin, String destination, int priority) {
+        return requestController.registerRequest(clientName, origin, destination, priority);
     }
     
-    public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad, int categoria) {
-        return requestController.registerRequest(cliente, origen, destino, prioridad, categoria);
+    public Request registerRequest(String clientName, String origin, String destination, int priority, int category) {
+        return requestController.registerRequest(clientName, origin, destination, priority, category);
     }
 
-    public Service procesarSiguienteServicio() {
+    public Service processNextService() {
         return requestController.processNextService();
     }
 
-    public VehicleList obtenerVehiculosOrdenadosQuickSort() {
+    public VehicleList getSortedVehiclesQuickSort() {
         return requestController.getSortedVehiclesQuickSort();
     }
     
-    public String explorarMapaBFS(String inicio) {
-        return requestController.exploreMapBFS(inicio);
+    public String exploreMapBFS(String start) {
+        return requestController.exploreMapBFS(start);
     }
     
-    public String obtenerColasReporte() {
-        RequestQueue colaUrgente = requestController.getUrgentQueue();
-        RequestQueue colaNormal = requestController.getNormalQueue();
-        String resultado = "";
+    public String getQueuesReport() {
+        RequestQueue urgentQueue = requestController.getUrgentQueue();
+        RequestQueue normalQueue = requestController.getNormalQueue();
+        String result = "";
 
-        resultado += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
+        result += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
 
-        resultado += "[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n";
-        resultado += "Tamaño: " + colaUrgente.getSize() + "\n";
-        if (colaUrgente.isEmpty()) {
-            resultado += "  [Vacía]\n";
+        result += "[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n";
+        result += "Tamaño: " + urgentQueue.getSize() + "\n";
+        if (urgentQueue.isEmpty()) {
+            result += "  [Vacía]\n";
         } else {
             int index = 1;
-            for (int i = 0; i < colaUrgente.getSize(); i++) {
-                Request req = colaUrgente.get(i);
-                resultado += "  " + index++ + ". ";
-                resultado += "ID: " + req.getId();
-                resultado += " | Cliente: " + req.getClientName();
-                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                resultado += " | Categoría: Emergencia";
-                resultado += "\n";
+            for (int i = 0; i < urgentQueue.getSize(); i++) {
+                Request req = urgentQueue.get(i);
+                result += "  " + index++ + ". ";
+                result += "ID: " + req.getId();
+                result += " | Cliente: " + req.getClientName();
+                result += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
+                result += " | Categoría: Emergencia";
+                result += "\n";
             }
         }
 
-        resultado += "\n";
+        result += "\n";
 
-        resultado += "[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n";
-        resultado += "Tamaño: " + colaNormal.getSize() + "\n";
-        if (colaNormal.isEmpty()) {
-            resultado += "  [Vacía]\n";
+        result += "[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n";
+        result += "Tamaño: " + normalQueue.getSize() + "\n";
+        if (normalQueue.isEmpty()) {
+            result += "  [Vacía]\n";
         } else {
             int index = 1;
-            for (int i = 0; i < colaNormal.getSize(); i++) {
-                Request req = colaNormal.get(i);
-                String categoria = obtenerNombreCategoria(req.getClientCategory());
-                resultado += "  " + index++ + ". ";
-                resultado += "ID: " + req.getId();
-                resultado += " | Cliente: " + req.getClientName();
-                resultado += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
-                resultado += " | Categoría: " + categoria;
-                resultado += "\n";
+            for (int i = 0; i < normalQueue.getSize(); i++) {
+                Request req = normalQueue.get(i);
+                String category = Utils.getCategoryName(req.getClientCategory());
+                result += "  " + index++ + ". ";
+                result += "ID: " + req.getId();
+                result += " | Cliente: " + req.getClientName();
+                result += " | Ruta: " + req.getOrigin() + " -> " + req.getDestination();
+                result += " | Categoría: " + category;
+                result += "\n";
             }
         }
 
-        resultado += "\nTotal de solicitudes pendientes: " + (colaUrgente.getSize() + colaNormal.getSize()) + "\n";
+        result += "\nTotal de solicitudes pendientes: " + (urgentQueue.getSize() + normalQueue.getSize()) + "\n";
 
-        return resultado;
+        return result;
     }
 
-    public ServiceList obtenerServiciosCompletados() {
+    public ServiceList getCompletedServices() {
         return requestController.getCompletedServices();
     }
     
-    public StringList obtenerNodosDisponibles() {
+    public StringList getAvailableNodes() {
         return requestController.getAvailableNodes();
     }
     
-    private String obtenerNombreCategoria(int categoria) {
-        switch(categoria) {
-            case 0: return "Económico";
-            case 1: return "Regular";
-            case 2: return "VIP";
-            case 3: return "Emergencia";
-            default: return "Desconocido";
-        }
-    }
     
-    public void guardarDatos() {
+    public void saveData() {
         requestController.saveData();
     }
     
-    public void cargarDatos() {
+    public void loadData() {
         requestController.loadData();
     }
     
-    public StringList obtenerHistorialEventos() {
+    public StringList getHistory() {
         return requestController.getHistory();
     }
 }

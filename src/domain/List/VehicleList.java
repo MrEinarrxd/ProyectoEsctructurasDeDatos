@@ -1,8 +1,6 @@
 package domain.List;
 
 import domain.Vehicle;
-import java.util.ArrayList;
-import java.util.List;
 
 public class VehicleList extends BaseLinkedList {
 
@@ -29,8 +27,8 @@ public class VehicleList extends BaseLinkedList {
         return super.contains(vehiculo);
     }
 
-    public List<Vehicle> obtenerTodos() {
-        List<Vehicle> lista = new ArrayList<>();
+    public VehicleList obtenerTodos() {
+        VehicleList lista = new VehicleList();
         Node current = head;
         while (current != null) {
             VehicleNode vehicleNode = (VehicleNode) current;

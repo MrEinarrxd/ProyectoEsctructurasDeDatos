@@ -14,4 +14,14 @@ public class Utils {
     public Graph mapa = new Graph();
     public RateTree tarifas = new RateTree();
     public ServiceList servicios = new ServiceList();
+    
+    public static String getCategoryName(int category) {
+        switch(category) {
+            case 0: return "Económico";
+            case 1: return "Regular";
+            case 2: return "VIP";
+            case 3: return "Emergencia";
+            default: return "Desconocido";
+        }
+    }
 }

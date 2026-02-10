@@ -10,19 +10,12 @@ import domain.List.ServiceList;
 
 public class DataManager {
     
-    private String obtenerNombreCategoria(int categoria) {
-        switch(categoria) {
-            case 0: return "Económico";
-            case 1: return "Regular";
-            case 2: return "VIP";
-            case 3: return "Emergencia";
-            default: return "Desconocido";
-        }
-    }
     
-    public void guardarVehiculos(VehicleList vehiculos, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Vehicle v : vehiculos.obtenerTodos()) {
+    public void saveVehicles(VehicleList vehicles, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            VehicleList allVehicles = vehicles.obtenerTodos();
+            for (int i = 0; i < allVehicles.getSize(); i++) {
+                Vehicle v = allVehicles.get(i);
                 writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
             }
         } catch (IOException e) {
@@ -30,33 +23,33 @@ public class DataManager {
         }
     }
 
-    public VehicleList cargarVehiculos(String archivo) {
-        VehicleList lista = new VehicleList();
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] partes = linea.split(",");
-                if (partes.length >= 3) {
-                    String driverName = partes.length >= 5 ? partes[4] : "Driver";
-                    String vehicleType = partes.length >= 6 ? partes[5] : "sedan";
-                    Vehicle v = new Vehicle(partes[0], driverName, partes[1], vehicleType);
-                    int serviceCount = Integer.parseInt(partes[2]);
+    public VehicleList loadVehicles(String file) {
+        VehicleList list = new VehicleList();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String driverName = parts.length >= 5 ? parts[4] : "Driver";
+                    String vehicleType = parts.length >= 6 ? parts[5] : "sedan";
+                    Vehicle v = new Vehicle(parts[0], driverName, parts[1], vehicleType);
+                    int serviceCount = Integer.parseInt(parts[2]);
                     for (int i = 0; i < serviceCount; i++) {
                         v.incrementServiceCount();
                     }
-                    if (partes.length >= 4) v.setAvailable(Boolean.parseBoolean(partes[3]));
-                    lista.add(v);
+                    if (parts.length >= 4) v.setAvailable(Boolean.parseBoolean(parts[3]));
+                    list.add(v);
                 }
             }
         } catch (IOException e) {
             System.out.println("Error cargando vehículos: " + e.getMessage());
         }
-        return lista;
+        return list;
     }
     
-    public void guardarSolicitudes(RequestQueue solicitudes, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            RequestQueue queue = solicitudes.getAll();
+    public void saveRequests(RequestQueue requests, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            RequestQueue queue = requests.getAll();
             for (int i = 0; i < queue.getSize(); i++) {
                 Request s = queue.get(i);
                 writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
@@ -66,9 +59,9 @@ public class DataManager {
         }
     }
     
-    public void guardarServicios(ServiceList servicios, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            ServiceList serviceList = servicios.getAll();
+    public void saveServices(ServiceList services, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            ServiceList serviceList = services.getAll();
             for (int i = 0; i < serviceList.getSize(); i++) {
                 Service s = serviceList.get(i);
                 writer.println(s.id + "," + s.request.getId() + "," + s.vehicle.getId() + "," + s.route + "," + s.cost);
@@ -78,13 +71,13 @@ public class DataManager {
         }
     }
     
-    public void guardarMapa(Graph grafo, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            var mapa = grafo.obtenerMapaAristas();
-            for (var entrada : mapa.entrySet()) {
-                String origen = entrada.getKey();
-                for (Edge arista : entrada.getValue()) {
-                    writer.println(origen + "," + arista.getTo() + "," + arista.getWeight());
+    public void saveMap(Graph graph, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            var map = graph.obtenerMapaAristas();
+            for (var entry : map.entrySet()) {
+                String origin = entry.getKey();
+                for (Edge edge : entry.getValue()) {
+                    writer.println(origin + "," + edge.getTo() + "," + edge.getWeight());
                 }
             }
         } catch (IOException e) {
@@ -92,18 +85,18 @@ public class DataManager {
         }
     }
     
-    public void cargarMapa(Graph grafo, String archivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            StringList agregados = new StringList();
-            while ((linea = reader.readLine()) != null) {
-                String[] partes = linea.split(",");
-                if (partes.length >= 3) {
-                    String clave = partes[0] + "-" + partes[1];
-                    String claveInversa = partes[1] + "-" + partes[0];
-                    if (!agregados.contains(clave) && !agregados.contains(claveInversa)) {
-                        grafo.addEdge(partes[0], partes[1], Integer.parseInt(partes[2]));
-                        agregados.add(clave);
+    public void loadMap(Graph graph, String file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            StringList added = new StringList();
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String key = parts[0] + "-" + parts[1];
+                    String inverseKey = parts[1] + "-" + parts[0];
+                    if (!added.contains(key) && !added.contains(inverseKey)) {
+                        graph.addEdge(parts[0], parts[1], Integer.parseInt(parts[2]));
+                        added.add(key);
                     }
                 }
             }
@@ -112,9 +105,11 @@ public class DataManager {
         }
     }
     
-    public void guardarTodo(Utils utils) {
+    public void saveAll(Utils utils) {
         try (PrintWriter writer = new PrintWriter("vehiculos.txt")) {
-            for (Vehicle v : utils.vehiculos.obtenerTodos()) {
+            VehicleList allVehicles = utils.vehiculos.obtenerTodos();
+            for (int i = 0; i < allVehicles.getSize(); i++) {
+                Vehicle v = allVehicles.get(i);
                 writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
             }
         } catch (IOException e) {
@@ -123,101 +118,103 @@ public class DataManager {
         System.out.println("Datos guardados exitosamente");
     }
     
-    public void cargarTodo(Utils utils) {
-        VehicleList vehiculos = cargarVehiculos("vehiculos.txt");
-        for (Vehicle v : vehiculos.obtenerTodos()) {
+    public void loadAll(Utils utils) {
+        VehicleList vehicles = loadVehicles("vehiculos.txt");
+        VehicleList allVehicles = vehicles.obtenerTodos();
+        for (int i = 0; i < allVehicles.getSize(); i++) {
+            Vehicle v = allVehicles.get(i);
             utils.vehiculos.add(v);
         }
         System.out.println("Datos cargados exitosamente");
     }
     
-    public void guardarHistorial(StringList historialEventos, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (int i = 0; i < historialEventos.getSize(); i++) {
-                writer.println(historialEventos.get(i));
+    public void saveHistory(StringList events, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (int i = 0; i < events.getSize(); i++) {
+                writer.println(events.get(i));
             }
         } catch (IOException e) {
             System.out.println("Error guardando historial: " + e.getMessage());
         }
     }
     
-    public StringList cargarHistorial(String archivo) {
-        StringList lista = new StringList();
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                lista.add(linea);
+    public StringList loadHistory(String file) {
+        StringList list = new StringList();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                list.add(line);
             }
         } catch (IOException e) {
             System.out.println("Error cargando historial: " + e.getMessage());
         }
-        return lista;
+        return list;
     }
     
     // Cargar datos iniciales desde archivo de configuración
-    public void cargarDatosIniciales(Utils utils, String archivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            String seccion = "";
+    public void loadInitialData(Utils utils, String file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            String section = "";
             
-            while ((linea = reader.readLine()) != null) {
-                linea = linea.trim();
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
                 
-                if (linea.isEmpty()) continue;
+                if (line.isEmpty()) continue;
                 
-                if (linea.startsWith("===")) {
-                    seccion = linea.replace("===", "").trim();
+                if (line.startsWith("===")) {
+                    section = line.replace("===", "").trim();
                     continue;
                 }
                 
-                if (seccion.contains("VEHÍCULOS")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 4) {
-                        String id = partes[0].trim();
-                        String driverName = partes[1].trim();
-                        String zona = partes[2].trim();
-                        String vehicleType = partes[3].trim();
-                        utils.vehiculos.add(new Vehicle(id, driverName, zona, vehicleType));
+                if (section.contains("VEHÍCULOS")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        String id = parts[0].trim();
+                        String driverName = parts[1].trim();
+                        String zone = parts[2].trim();
+                        String vehicleType = parts[3].trim();
+                        utils.vehiculos.add(new Vehicle(id, driverName, zone, vehicleType));
                     }
                 }
-                else if (seccion.contains("MAPA")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 3) {
-                        String origen = partes[0].trim();
-                        String destino = partes[1].trim();
-                        int peso = Integer.parseInt(partes[2].trim());
-                        utils.mapa.addEdge(origen, destino, peso);
+                else if (section.contains("MAPA")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        String origin = parts[0].trim();
+                        String destination = parts[1].trim();
+                        int weight = Integer.parseInt(parts[2].trim());
+                        utils.mapa.addEdge(origin, destination, weight);
                     }
                 }
-                else if (seccion.contains("TARIFAS")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 2) {
-                        String categoria = partes[0].trim();
-                        double precio = Double.parseDouble(partes[1].trim());
-                        utils.tarifas.add(categoria, precio);
+                else if (section.contains("TARIFAS")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        String category = parts[0].trim();
+                        double price = Double.parseDouble(parts[1].trim());
+                        utils.tarifas.add(category, price);
                     }
                 }
-                else if (seccion.contains("SOLICITUDES")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 5) {
-                        String id = partes[0].trim();
-                        String cliente = partes[1].trim();
-                        String origen = partes[2].trim();
-                        String destino = partes[3].trim();
-                        int categoria = Integer.parseInt(partes[4].trim());
-                        Request solicitud = new Request(id, origen, destino, cliente, categoria);
-                        if (solicitud.getClientCategory() == 3) {
-                            utils.colaUrgente.enqueue(solicitud, 4);
-                            utils.historialEventos.push("EMERGENCIA: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                else if (section.contains("SOLICITUDES")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 5) {
+                        String id = parts[0].trim();
+                        String client = parts[1].trim();
+                        String origin = parts[2].trim();
+                        String destination = parts[3].trim();
+                        int category = Integer.parseInt(parts[4].trim());
+                        Request request = new Request(id, origin, destination, client, category);
+                        if (request.getClientCategory() == 3) {
+                            utils.colaUrgente.enqueue(request, 4);
+                            utils.historialEventos.push("EMERGENCIA: " + request.getClientName() + " de " + request.getOrigin() + " a " + request.getDestination());
                         } else {
-                            utils.colaNormal.enqueue(solicitud);
-                            String categoriaNombre = obtenerNombreCategoria(categoria);
-                            utils.historialEventos.push(categoriaNombre.toUpperCase() + ": " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                            utils.colaNormal.enqueue(request);
+                            String categoryName = Utils.getCategoryName(category);
+                            utils.historialEventos.push(categoryName.toUpperCase() + ": " + request.getClientName() + " de " + request.getOrigin() + " a " + request.getDestination());
                         }
                     }
                 }
             }
-            System.out.println("Datos iniciales cargados desde " + archivo);
+            System.out.println("Datos iniciales cargados desde " + file);
         } catch (IOException e) {
             System.out.println("Error cargando datos iniciales: " + e.getMessage());
         }

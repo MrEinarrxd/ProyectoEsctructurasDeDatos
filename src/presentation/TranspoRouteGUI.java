@@ -65,7 +65,7 @@ public class TranspoRouteGUI extends JFrame {
         tabbedPane.addTab("Nueva Solicitud", crearPanelSolicitud());
         tabbedPane.addTab("Procesar", crearPanelProcesar());
 
-        graphPanel = new GraphPanel(controller.getMapa());
+        graphPanel = new GraphPanel(controller.getMap());
         JScrollPane mapScroll = new JScrollPane(graphPanel, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -121,7 +121,7 @@ public class TranspoRouteGUI extends JFrame {
         categoriaCombo.setSelectedIndex(1);
 
         // Cargar nodos disponibles en los combos
-        StringList nodos = controller.obtenerNodosDisponibles();
+        StringList nodos = controller.getAvailableNodes();
         for (int i = 0; i < nodos.getSize(); i++) {
             String nodo = nodos.get(i);
             origenCombo.addItem(nodo);
@@ -171,7 +171,7 @@ public class TranspoRouteGUI extends JFrame {
                 return;
             }
 
-            controller.registrarSolicitud(cliente, origen, destino, prioridad, categoria);
+            controller.registerRequest(cliente, origen, destino, prioridad, categoria);
             String categoriaNombre = categoriaCombo.getSelectedItem().toString();
             agregarAlHistorial("Solicitud registrada - Cliente: " + cliente + " (" + categoriaNombre + "), " + origen + " -> " + destino);
 
@@ -218,43 +218,43 @@ public class TranspoRouteGUI extends JFrame {
         ));
 
         procesarBtn.addActionListener(e -> {
-            Service servicio = controller.procesarSiguienteServicio();
-            if (servicio == null) {
+            Service service = controller.processNextService();
+            if (service == null) {
                 resultadoArea.setText("No hay solicitudes pendientes\n");
                 agregarAlHistorial("Intento de procesar solicitud - Sin solicitudes pendientes");
             } else {
                 resultadoArea.setText("");
                 resultadoArea.append("=====================================================\n");
-                resultadoArea.append("SERVICIO #" + servicio.id + " COMPLETADO\n");
+                resultadoArea.append("SERVICIO #" + service.id + " COMPLETADO\n");
                 resultadoArea.append("=====================================================\n\n");
 
                 resultadoArea.append("INFORMACIÓN GENERAL:\n");
-                resultadoArea.append("  Cliente: " + servicio.request.getClientName() + "\n");
-                resultadoArea.append("  Vehículo: " + servicio.vehicle.getId() + " (Zona: " + servicio.vehicle.getCurrentZone() + ")\n");
-                resultadoArea.append("  Ruta: " + servicio.request.getOrigin() + " -> " + servicio.request.getDestination() + "\n");
-                resultadoArea.append("  Costo Total: $" + servicio.cost + "\n\n");
+                resultadoArea.append("  Cliente: " + service.request.getClientName() + "\n");
+                resultadoArea.append("  Vehículo: " + service.vehicle.getId() + " (Zona: " + service.vehicle.getCurrentZone() + ")\n");
+                resultadoArea.append("  Ruta: " + service.request.getOrigin() + " -> " + service.request.getDestination() + "\n");
+                resultadoArea.append("  Costo Total: $" + service.cost + "\n\n");
 
                 resultadoArea.append("RUTA DEL VEHÍCULO AL CLIENTE:\n");
-                String rutaVehiculo = servicio.vehicleToClientRoute != null && !servicio.vehicleToClientRoute.isEmpty() 
-                    ? servicio.vehicleToClientRoute 
+                String rutaVehiculo = service.vehicleToClientRoute != null && !service.vehicleToClientRoute.isEmpty() 
+                    ? service.vehicleToClientRoute 
                     : "Vehículo ya en ubicación";
                 resultadoArea.append("  " + rutaVehiculo + "\n\n");
 
                 resultadoArea.append("RUTA DEL CLIENTE AL DESTINO:\n");
-                String rutaCliente = servicio.clientToDestinationRoute != null && !servicio.clientToDestinationRoute.isEmpty() 
-                    ? servicio.clientToDestinationRoute 
+                String rutaCliente = service.clientToDestinationRoute != null && !service.clientToDestinationRoute.isEmpty() 
+                    ? service.clientToDestinationRoute 
                     : "No disponible";
                 resultadoArea.append("  " + rutaCliente + "\n\n");
 
-                if (servicio.algorithmDetail != null && !servicio.algorithmDetail.isEmpty()) {
+                if (service.algorithmDetail != null && !service.algorithmDetail.isEmpty()) {
                     resultadoArea.append("=====================================================\n");
                     resultadoArea.append("DETALLE DEL ALGORITMO\n");
                     resultadoArea.append("=====================================================\n\n");
-                    resultadoArea.append(servicio.algorithmDetail);
+                    resultadoArea.append(service.algorithmDetail);
                 }
 
                 String rutaSimplificada = rutaCliente.equals("No disponible") ? "No disponible" : rutaCliente;
-                agregarAlHistorial("Solicitud procesada - Servicio #" + servicio.id + " para " + servicio.request.getClientName() + " | Ruta: " + rutaSimplificada);
+                agregarAlHistorial("Solicitud procesada - Servicio #" + service.id + " para " + service.request.getClientName() + " | Ruta: " + rutaSimplificada);
 
                 resultadoArea.setCaretPosition(0);
             }
@@ -367,18 +367,18 @@ public class TranspoRouteGUI extends JFrame {
         reporteArea.append("  • Tarifa Premium: $15.00 por unidad de distancia\n");
         reporteArea.append("  • Tarifa VIP: $25.00 por unidad de distancia\n\n");
 
-        VehicleList vehiculos = controller.obtenerVehiculosOrdenadosQuickSort();
+        VehicleList vehiculos = controller.getSortedVehiclesQuickSort();
         reporteArea.append("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");
         for (int i = 0; i < vehiculos.getSize(); i++) {
             reporteArea.append(vehiculos.get(i) + "\n");
         }
 
         reporteArea.append("\n");
-        String reporte = controller.obtenerColasReporte();
+        String reporte = controller.getQueuesReport();
         reporteArea.append(reporte);
 
         reporteArea.append("\n=== SERVICIOS COMPLETADOS ===\n");
-        ServiceList servicios = controller.obtenerServiciosCompletados();
+        ServiceList servicios = controller.getCompletedServices();
         if (servicios.isEmpty()) {
             reporteArea.append("[Sin servicios completados]\n");
         } else {
@@ -436,7 +436,7 @@ public class TranspoRouteGUI extends JFrame {
         nodoCombo.setPreferredSize(new Dimension(120, 30));
 
         // Llenar combo con nodos disponibles
-        StringList nodos = controller.obtenerNodosDisponibles();
+        StringList nodos = controller.getAvailableNodes();
         for (int i = 0; i < nodos.getSize(); i++) {
             nodoCombo.addItem(nodos.get(i));
         }
@@ -467,7 +467,7 @@ public class TranspoRouteGUI extends JFrame {
         explorarBtn.addActionListener(e -> {
             String nodoInicio = (String) nodoCombo.getSelectedItem();
             if (nodoInicio != null) {
-                String resultado = controller.explorarMapaBFS(nodoInicio);
+                String resultado = controller.exploreMapBFS(nodoInicio);
                 resultadoArea.setText(resultado);
                 agregarAlHistorial("Búsqueda BFS ejecutada desde nodo: " + nodoInicio);
             }
@@ -533,7 +533,7 @@ public class TranspoRouteGUI extends JFrame {
 
         guardarBtn.addActionListener(e -> {
             try {
-                controller.guardarDatos();
+                controller.saveData();
                 infoArea.append("\n✓ Datos guardados exitosamente\n");
                 infoArea.setCaretPosition(infoArea.getDocument().getLength());
             } catch (Exception ex) {

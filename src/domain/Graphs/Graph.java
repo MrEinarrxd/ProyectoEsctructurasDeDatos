@@ -259,7 +259,7 @@ public class Graph {
         String detalle = "";
 
         if (!hasNode(inicio) || !hasNode(fin)) {
-            resultado.detalleAlgoritmo = "Nodo no encontrado en el mapa";
+            resultado.algorithmDetail = "Nodo no encontrado en el mapa";
             return resultado;
         }
 
@@ -345,22 +345,22 @@ public class Graph {
                 actual = previos[getNodeIndex(actual)];
             }
 
-            resultado.camino = camino;
-            resultado.distanciaTotal = distancia[finIndex];
-
             detalle += "  Ruta óptima: ";
             for (int i = 0; i < camino.getSize(); i++) {
                 detalle += camino.get(i);
                 if (i < camino.getSize() - 1) detalle += " → ";
             }
-            detalle += "\n  Distancia total: " + resultado.distanciaTotal + " unidades\n";
+            detalle += "\n  Distancia total: " + distancia[finIndex] + " unidades\n";
             detalle += "\n═══════════════════════════════════════\n";
+            
+            resultado = new Path(distancia[finIndex], camino);
         } else {
             detalle += "  No se encontró un camino válido\n";
             detalle += "═══════════════════════════════════════\n";
+            resultado = new Path(-1, new StringList());
         }
 
-        resultado.detalleAlgoritmo = detalle;
+        resultado.algorithmDetail = detalle;
         return resultado;
     }
 

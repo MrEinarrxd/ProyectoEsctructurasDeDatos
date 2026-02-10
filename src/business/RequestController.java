@@ -25,7 +25,7 @@ public class RequestController {
 	}
 
 	private void initData() {
-		dataManager.cargarDatosIniciales(utils, "datos_iniciales.txt");
+		dataManager.loadInitialData(utils, "datos_iniciales.txt");
 	}
 
 	public Graph getMap() {
@@ -41,7 +41,7 @@ public class RequestController {
 		String id = "REQ" + randomNumber;
 		Request request = new Request(id, origin, destination, client, clientCategory);
 		addRequest(request);
-		String category = getCategoryName(clientCategory);
+		String category = Utils.getCategoryName(clientCategory);
 		registerEvent("Solicitud registrada - Cliente: " + client + " (" + category + "), " + origin + " -> " + destination);
 		return request;
 	}
@@ -100,12 +100,12 @@ public class RequestController {
 	}
 	
 	public void saveData() {
-		dataManager.guardarTodo(utils);
-		dataManager.guardarHistorial(getHistory(), "historial.txt");
+		dataManager.saveAll(utils);
+		dataManager.saveHistory(getHistory(), "historial.txt");
 	}
 	
 	public void loadData() {
-		dataManager.cargarTodo(utils);
+		dataManager.loadAll(utils);
 	}
 	
 	public StringList getHistory() {
@@ -123,15 +123,6 @@ public class RequestController {
 		utils.historialEventos.push("[" + timestamp + "] " + event);
 	}
 
-	private String getCategoryName(int category) {
-		switch(category) {
-			case 0: return "Económico";
-			case 1: return "Regular";
-			case 2: return "VIP";
-			case 3: return "Emergencia";
-			default: return "Desconocido";
-		}
-	}
 
 	private void addRequest(Request r) {
 		if (r.getClientCategory() == 3) {
@@ -139,7 +130,7 @@ public class RequestController {
 			utils.historialEventos.push("EMERGENCIA: " + r.getClientName() + " de " + r.getOrigin() + " a " + r.getDestination());
 		} else {
 			utils.colaNormal.enqueue(r);
-			String category = getCategoryName(r.getClientCategory());
+			String category = Utils.getCategoryName(r.getClientCategory());
 			utils.historialEventos.push(category.toUpperCase() + ": " + r.getClientName() + " de " + r.getOrigin() + " a " + r.getDestination());
 		}
 	}
@@ -184,11 +175,12 @@ public class RequestController {
 
 		service.vehicleToClientRoute = String.join(" -> ", vehicleRoute.path.toArray());
 		service.clientToDestinationRoute = String.join(" -> ", clientRoute.path.toArray());
-		service.algorithmDetail = clientRoute.detalleAlgoritmo;
+		service.algorithmDetail = clientRoute.algorithmDetail;
 
 		utils.servicios.add(service);
 		utils.historialEventos.push("SERVICIO #" + service.id + " creado: $" + cost);
 
+		vehicle.setAvailable(true);
 		return service;
 	}
 
