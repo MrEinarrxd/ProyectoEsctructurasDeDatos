@@ -2,6 +2,14 @@ package domain.List;
 
 import domain.Request;
 
+/**
+ * Cola de prioridad para solicitudes de transporte.
+ * Implementa una lista enlazada ordenada por prioridad (mayor a menor).
+ * La solicitud con mayor prioridad siempre está al frente de la cola.
+ * Operaciones:
+ * - enqueue: O(n) - inserta en posición ordenada
+ * - dequeue: O(1) - remueve el elemento de mayor prioridad
+ */
 public class RequestPriorityQueue {
     private Node head;
     private int size;
@@ -23,13 +31,19 @@ public class RequestPriorityQueue {
         this.size = 0;
     }
     
+    /**
+     * Inserta una solicitud manteniendo el orden por prioridad.
+     * Mayor prioridad = más cerca del frente de la cola.
+     */
     public void enqueue(Request data, int priority) {
         Node newNode = new Node(data, priority);
         
+        // Insertar al inicio si es la de mayor prioridad o cola vacía
         if (head == null || priority > head.priority) {
             newNode.next = head;
             head = newNode;
         } else {
+            // Buscar posición correcta manteniendo orden descendente de prioridad
             Node current = head;
             while (current.next != null && current.next.priority >= priority) {
                 current = current.next;

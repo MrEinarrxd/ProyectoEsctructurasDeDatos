@@ -10,224 +10,231 @@ import domain.List.StringList;
 
 public class DataManager {
     
-    private String obtenerNombreCategoria(int categoria) {
-        switch(categoria) {
-            case 0: return "Económico";
-            case 1: return "Regular";
-            case 2: return "VIP";
-            case 3: return "Emergencia";
-            default: return "Desconocido";
-        }
-    }
-    
-    // Guardar vehículos
-    public void guardarVehiculos(VehicleList vehiculos, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Vehicle v : vehiculos.obtenerTodos()) {
+    /**
+     * Guarda la lista de vehículos en un archivo CSV.
+     * Formato: ID,Zona,CantServicios,Disponible,Conductor,Tipo
+     */
+    public void saveVehicles(VehicleList vehicles, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (Vehicle v : vehicles.getAll()) {
                 writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
             }
         } catch (IOException e) {
-            System.out.println("Error guardando vehículos: " + e.getMessage());
+            System.out.println("Error saving vehicles: " + e.getMessage());
         }
     }
 
-    public VehicleList cargarVehiculos(String archivo) {
-        VehicleList lista = new VehicleList();
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] partes = linea.split(",");
-                if (partes.length >= 3) {
-                    String driverName = partes.length >= 5 ? partes[4] : "Driver";
-                    String vehicleType = partes.length >= 6 ? partes[5] : "sedan";
-                    Vehicle v = new Vehicle(partes[0], driverName, partes[1], vehicleType);
-                    // Establecer serviceCount usando incrementServiceCount varias veces
-                    int serviceCount = Integer.parseInt(partes[2]);
+    /**
+     * Carga vehículos desde un archivo CSV.
+     * Reconstruye objetos Vehicle con todos sus atributos.
+     */
+    public VehicleList loadVehicles(String file) {
+        VehicleList list = new VehicleList();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String driverName = parts.length >= 5 ? parts[4] : "Driver";
+                    String vehicleType = parts.length >= 6 ? parts[5] : "sedan";
+                    Vehicle v = new Vehicle(parts[0], driverName, parts[1], vehicleType);
+                    // Set serviceCount using incrementServiceCount multiple times
+                    int serviceCount = Integer.parseInt(parts[2]);
                     for (int i = 0; i < serviceCount; i++) {
                         v.incrementServiceCount();
                     }
-                    if (partes.length >= 4) v.setAvailable(Boolean.parseBoolean(partes[3]));
-                    lista.add(v);
+                    if (parts.length >= 4) v.setAvailable(Boolean.parseBoolean(parts[3]));
+                    list.add(v);
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error cargando vehículos: " + e.getMessage());
+            System.out.println("Error loading vehicles: " + e.getMessage());
         }
-        return lista;
+        return list;
     }
     
-    // Guardar solicitudes
-    public void guardarSolicitudes(domain.List.RequestQueue solicitudes, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Request s : solicitudes.getAll()) {
+    // Save requests
+    public void saveRequests(domain.List.RequestQueue requests, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (Request s : requests.getAll()) {
                 writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
             }
         } catch (IOException e) {
-            System.out.println("Error guardando solicitudes: " + e.getMessage());
+            System.out.println("Error saving requests: " + e.getMessage());
         }
     }
     
-    // Guardar servicios
-    public void guardarServicios(domain.List.ServiceList servicios, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (Service s : servicios.getAll()) {
+    // Save services
+    public void saveServices(domain.List.ServiceList services, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (Service s : services.getAll()) {
                 writer.println(s.id + "," + s.request.getId() + "," + s.vehicle.getId() + "," + s.route + "," + s.cost);
             }
         } catch (IOException e) {
-            System.out.println("Error guardando servicios: " + e.getMessage());
+            System.out.println("Error saving services: " + e.getMessage());
         }
     }
     
-    // Guardar mapa (grafo)
-    public void guardarMapa(Graph grafo, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            var mapa = grafo.obtenerMapaAristas();
-            for (var entrada : mapa.entrySet()) {
-                String origen = entrada.getKey();
-                for (Edge arista : entrada.getValue()) {
-                    writer.println(origen + "," + arista.getTo() + "," + arista.getWeight());
+    /**
+     * Guarda el grafo (mapa de zonas) en un archivo CSV.
+     * Formato: Origen,Destino,Peso
+     */
+    public void saveMap(Graph graph, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            var map = graph.getEdgeMap();
+            for (var entry : map.entrySet()) {
+                String origin = entry.getKey();
+                for (Edge edge : entry.getValue()) {
+                    writer.println(origin + "," + edge.getTo() + "," + edge.getWeight());
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error guardando mapa: " + e.getMessage());
+            System.out.println("Error saving map: " + e.getMessage());
         }
     }
     
-    // Cargar mapa (grafo)
-    public void cargarMapa(Graph grafo, String archivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            StringList agregados = new StringList();
-            while ((linea = reader.readLine()) != null) {
-                String[] partes = linea.split(",");
-                if (partes.length >= 3) {
-                    String clave = partes[0] + "-" + partes[1];
-                    String claveInversa = partes[1] + "-" + partes[0];
-                    if (!agregados.contains(clave) && !agregados.contains(claveInversa)) {
-                        grafo.addEdge(partes[0], partes[1], Integer.parseInt(partes[2]));
-                        agregados.add(clave);
+    /**
+     * Carga el grafo desde un archivo CSV.
+     * Evita duplicar aristas (A-B y B-A son la misma arista en grafo no dirigido).
+     */
+    public void loadMap(Graph graph, String file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            StringList added = new StringList();
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String key = parts[0] + "-" + parts[1];
+                    String reverseKey = parts[1] + "-" + parts[0];
+                    if (!added.contains(key) && !added.contains(reverseKey)) {
+                        graph.addEdge(parts[0], parts[1], Integer.parseInt(parts[2]));
+                        added.add(key);
                     }
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error cargando mapa: " + e.getMessage());
+            System.out.println("Error loading map: " + e.getMessage());
         }
     }
     
-    // Métodos de conveniencia con nombres por defecto
-    public void guardarTodo(Utils utils) {
-        try (PrintWriter writer = new PrintWriter("vehiculos.txt")) {
-            for (Vehicle v : utils.vehiculos.obtenerTodos()) {
-                writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
+    // Convenience methods with default names
+    public void saveAll(Utils utils) {
+        saveVehicles(utils.vehiculos, "vehiculos.txt");
+        System.out.println("Data saved successfully");
+    }
+    
+    public void loadAll(Utils utils) {
+        VehicleList vehicles = loadVehicles("vehiculos.txt");
+        for (Vehicle v : vehicles.getAll()) {
+            utils.vehiculos.add(v);
+        }
+        System.out.println("Data loaded successfully");
+    }
+    
+    // Save history
+    public void saveHistory(StringList historyEvents, String file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            for (String event : historyEvents.getAll()) {
+                writer.println(event);
             }
         } catch (IOException e) {
-            System.out.println("Error guardando vehículos: " + e.getMessage());
+            System.out.println("Error saving history: " + e.getMessage());
         }
-        System.out.println("Datos guardados exitosamente");
     }
     
-    public void cargarTodo(Utils utils) {
-        VehicleList vehiculos = cargarVehiculos("vehiculos.txt");
-        for (Vehicle v : vehiculos.obtenerTodos()) {
-            utils.vehiculos.agregar(v);
-        }
-        System.out.println("Datos cargados exitosamente");
-    }
-    
-    // Guardar historial
-    public void guardarHistorial(StringList historialEventos, String archivo) {
-        try (PrintWriter writer = new PrintWriter(archivo)) {
-            for (String evento : historialEventos.getAll()) {
-                writer.println(evento);
+    // Load history
+    public List<String> loadHistory(String file) {
+        List<String> list = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                list.add(line);
             }
         } catch (IOException e) {
-            System.out.println("Error guardando historial: " + e.getMessage());
+            System.out.println("Error loading history: " + e.getMessage());
         }
+        return list;
     }
     
-    // Cargar historial
-    public List<String> cargarHistorial(String archivo) {
-        List<String> lista = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                lista.add(linea);
-            }
-        } catch (IOException e) {
-            System.out.println("Error cargando historial: " + e.getMessage());
-        }
-        return lista;
-    }
-    
-    // Cargar datos iniciales desde archivo de configuración
-    public void cargarDatosIniciales(Utils utils, String archivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            String seccion = "";
+    /**
+     * Carga datos iniciales del sistema desde archivo de configuración.
+     * FORMATO DEL ARCHIVO:
+     * - Secciones separadas por líneas ===NOMBRE_SECCION===
+     * - Secciones soportadas: ZONAS, VEHICULOS, CATEGORIAS, TARIFAS
+     * - ZONAS: Origen,Destino,Peso (aristas del grafo)
+     * - VEHICULOS: ID,Conductor,ZonaActual,TipoVehiculo
+     * - CATEGORIAS: Nombre,Factor (no usado actualmente)
+     * - TARIFAS: Nombre,Valor (árbol de tarifas)
+     */
+    public void loadInitialData(Utils utils, String file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            String section = "";
             
-            while ((linea = reader.readLine()) != null) {
-                linea = linea.trim();
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
                 
-                // Ignorar líneas vacías
-                if (linea.isEmpty()) continue;
+                // Ignore empty lines
+                if (line.isEmpty()) continue;
                 
-                // Detectar secciones
-                if (linea.startsWith("===")) {
-                    seccion = linea.replace("===", "").trim();
+                // Detect sections
+                if (line.startsWith("===")) {
+                    section = line.replace("===", "").trim();
                     continue;
                 }
                 
-                // Procesar según la sección
-                if (seccion.contains("VEHÍCULOS")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 4) {
-                        String id = partes[0].trim();
-                        String driverName = partes[1].trim();
-                        String zona = partes[2].trim();
-                        String vehicleType = partes[3].trim();
-                        utils.vehiculos.agregar(new Vehicle(id, driverName, zona, vehicleType));
+                // Process according to section
+                if (section.contains("VEHÍCULOS")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        String id = parts[0].trim();
+                        String driverName = parts[1].trim();
+                        String zone = parts[2].trim();
+                        String vehicleType = parts[3].trim();
+                        utils.vehiculos.add(new Vehicle(id, driverName, zone, vehicleType));
                     }
                 }
-                else if (seccion.contains("MAPA")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 3) {
-                        String origen = partes[0].trim();
-                        String destino = partes[1].trim();
-                        int peso = Integer.parseInt(partes[2].trim());
-                        utils.mapa.addEdge(origen, destino, peso);
+                else if (section.contains("MAPA")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        String origin = parts[0].trim();
+                        String destination = parts[1].trim();
+                        int weight = Integer.parseInt(parts[2].trim());
+                        utils.mapa.addEdge(origin, destination, weight);
                     }
                 }
-                else if (seccion.contains("TARIFAS")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 2) {
-                        String categoria = partes[0].trim();
-                        double precio = Double.parseDouble(partes[1].trim());
-                        utils.tarifas.add(categoria, precio);
+                else if (section.contains("TARIFAS")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        String category = parts[0].trim();
+                        double price = Double.parseDouble(parts[1].trim());
+                        utils.tarifas.add(category, price);
                     }
                 }
-                else if (seccion.contains("SOLICITUDES")) {
-                    String[] partes = linea.split(",");
-                    if (partes.length >= 5) {
-                        String id = partes[0].trim();
-                        String cliente = partes[1].trim();
-                        String origen = partes[2].trim();
-                        String destino = partes[3].trim();
-                        int categoria = Integer.parseInt(partes[4].trim());
-                        Request solicitud = new Request(id, origen, destino, cliente, categoria);
-                        if (solicitud.getClientCategory() == 3) {
-                            utils.colaUrgente.enqueue(solicitud, 4);
-                            utils.historialEventos.push("EMERGENCIA: " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                else if (section.contains("SOLICITUDES")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 5) {
+                        String id = parts[0].trim();
+                        String client = parts[1].trim();
+                        String origin = parts[2].trim();
+                        String destination = parts[3].trim();
+                        int category = Integer.parseInt(parts[4].trim());
+                        Request request = new Request(id, origin, destination, client, category);
+                        if (request.getClientCategory() == 3) {
+                            utils.colaUrgente.enqueue(request, 4);
+                            utils.historialEventos.push("EMERGENCIA: " + request.getClientName() + " de " + request.getOrigin() + " a " + request.getDestination());
                         } else {
-                            utils.colaNormal.enqueue(solicitud);
-                            String categoriaNombre = obtenerNombreCategoria(categoria);
-                            utils.historialEventos.push(categoriaNombre.toUpperCase() + ": " + solicitud.getClientName() + " de " + solicitud.getOrigin() + " a " + solicitud.getDestination());
+                            utils.colaNormal.enqueue(request);
+                            String[] categories = {"ECONÓMICO", "REGULAR", "VIP", "EMERGENCIA"};
+                            String categoryName = category >= 0 && category < 4 ? categories[category] : "DESCONOCIDO";
+                            utils.historialEventos.push(categoryName + ": " + request.getClientName() + " de " + request.getOrigin() + " a " + request.getDestination());
                         }
                     }
                 }
             }
-            System.out.println("Datos iniciales cargados desde " + archivo);
+            System.out.println("Initial data loaded from " + file);
         } catch (IOException e) {
-            System.out.println("Error cargando datos iniciales: " + e.getMessage());
+            System.out.println("Error loading initial data: " + e.getMessage());
         }
     }
 }

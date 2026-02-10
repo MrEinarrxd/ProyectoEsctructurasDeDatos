@@ -22,11 +22,6 @@ public class Request {
         this.timestamp = LocalDateTime.now();
         this.assignedVehicleId = null;
     }
-
-    // Constructor compatible con versiones anteriores
-    public Request(String id, String origin, String destination, String clientName, int priority, int clientCategory) {
-        this(id, origin, destination, clientName, clientCategory);
-    }
     
     public String getId() {
         return id;

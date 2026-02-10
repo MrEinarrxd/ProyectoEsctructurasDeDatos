@@ -5,33 +5,18 @@ import domain.List.StringList;
 public class Path {
     public final int distance;
     public final StringList path;
+    public String algorithmDetail;
     
-    // Properties from DetailedPathResult
-    public StringList camino;
-    public int distanciaTotal;
-    public String detalleAlgoritmo;
-    
-    // Constructor original
     public Path(int distance, StringList path) {
         this.distance = distance;
         this.path = path;
-        this.camino = new StringList();
-        this.distanciaTotal = distance;
-        this.detalleAlgoritmo = "";
-        
-        // Convert StringList to StringList
-        for (int i = 0; i < path.getSize(); i++) {
-            this.camino.add(path.get(i));
-        }
+        this.algorithmDetail = "";
     }
     
-    // Constructor for detailed results
     public Path() {
         this.distance = 0;
         this.path = new StringList();
-        this.camino = new StringList();
-        this.distanciaTotal = 0;
-        this.detalleAlgoritmo = "";
+        this.algorithmDetail = "";
     }
     
     @Override

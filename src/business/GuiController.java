@@ -19,97 +19,89 @@ public class GuiController {
     }
 
     public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
-        return requestController.registrarSolicitud(cliente, origen, destino, prioridad);
+        return requestController.registerRequest(cliente, origen, destino, prioridad);
     }
     
     public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad, int categoria) {
-        return requestController.registrarSolicitud(cliente, origen, destino, prioridad, categoria);
+        return requestController.registerRequest(cliente, origen, destino, prioridad, categoria);
     }
 
     public Service procesarSiguienteServicio() {
-        return requestController.procesarSiguienteServicio();
+        return requestController.processNextService();
     }
 
     public VehicleList obtenerVehiculosOrdenadosQuickSort() {
-        return requestController.obtenerVehiculosOrdenadosQuickSort();
+        return requestController.getSortedVehiclesQuickSort();
     }
     
     public String explorarMapaBFS(String inicio) {
-        return requestController.explorarMapaBFS(inicio);
+        return requestController.exploreMapBFS(inicio);
     }
     
     public String obtenerColasReporte() {
-        domain.List.RequestQueue colaUrgente = requestController.obtenerColaUrgente();
-        domain.List.RequestQueue colaNormal = requestController.obtenerColaNormal();
-        StringBuilder resultado = new StringBuilder();
+        domain.List.RequestQueue urgentQueue = requestController.getUrgentQueue();
+        domain.List.RequestQueue normalQueue = requestController.getNormalQueue();
+        StringBuilder result = new StringBuilder();
 
-        resultado.append("=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n");
+        result.append("=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n");
 
-        resultado.append("[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n");
-        resultado.append("Tamaño: ").append(colaUrgente.getSize()).append("\n");
-        if (colaUrgente.isEmpty()) {
-            resultado.append("  [Vacía]\n");
+        result.append("[EMERGENCIA] COLA URGENTE (Categoría: Emergencia):\n");
+        result.append("Tamaño: ").append(urgentQueue.getSize()).append("\n");
+        if (urgentQueue.isEmpty()) {
+            result.append("  [Vacía]\n");
         } else {
             int index = 1;
-            for (Request req : colaUrgente.getAll()) {
-                resultado.append("  ").append(index++).append(". ");
-                resultado.append("ID: ").append(req.getId());
-                resultado.append(" | Cliente: ").append(req.getClientName());
-                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Categoría: Emergencia");
-                resultado.append("\n");
+            for (Request req : urgentQueue.getAll()) {
+                result.append("  ").append(index++).append(". ");
+                result.append("ID: ").append(req.getId());
+                result.append(" | Cliente: ").append(req.getClientName());
+                result.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
+                result.append(" | Categoría: Emergencia");
+                result.append("\n");
             }
         }
 
-        resultado.append("\n");
+        result.append("\n");
 
-        resultado.append("[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n");
-        resultado.append("Tamaño: ").append(colaNormal.getSize()).append("\n");
-        if (colaNormal.isEmpty()) {
-            resultado.append("  [Vacía]\n");
+        result.append("[NORMAL] COLA NORMAL (Procesadas por: VIP > Regular > Económico):\n");
+        result.append("Tamaño: ").append(normalQueue.getSize()).append("\n");
+        if (normalQueue.isEmpty()) {
+            result.append("  [Vacía]\n");
         } else {
             int index = 1;
-            for (Request req : colaNormal.getAll()) {
-                String categoria = obtenerNombreCategoria(req.getClientCategory());
-                resultado.append("  ").append(index++).append(". ");
-                resultado.append("ID: ").append(req.getId());
-                resultado.append(" | Cliente: ").append(req.getClientName());
-                resultado.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
-                resultado.append(" | Categoría: ").append(categoria);
-                resultado.append("\n");
+            for (Request req : normalQueue.getAll()) {
+                String[] categories = {"Económico", "Regular", "VIP", "Emergencia"};
+                int cat = req.getClientCategory();
+                String category = cat >= 0 && cat < 4 ? categories[cat] : "Desconocido";
+                result.append("  ").append(index++).append(". ");
+                result.append("ID: ").append(req.getId());
+                result.append(" | Cliente: ").append(req.getClientName());
+                result.append(" | Ruta: ").append(req.getOrigin()).append(" -> ").append(req.getDestination());
+                result.append(" | Categoría: ").append(category);
+                result.append("\n");
             }
         }
 
-        resultado.append("\nTotal de solicitudes pendientes: ")
-            .append(colaUrgente.getSize() + colaNormal.getSize())
+        result.append("\nTotal de solicitudes pendientes: ")
+            .append(urgentQueue.getSize() + normalQueue.getSize())
             .append("\n");
 
-        return resultado.toString();
+        return result.toString();
     }
 
     public ServiceList obtenerServiciosCompletados() {
-        return requestController.obtenerServiciosCompletados();
+        return requestController.getCompletedServices();
     }
     
     public StringList obtenerNodosDisponibles() {
-        return requestController.obtenerNodosDisponibles();
-    }
-    
-    private String obtenerNombreCategoria(int categoria) {
-        switch(categoria) {
-            case 0: return "Económico";
-            case 1: return "Regular";
-            case 2: return "VIP";
-            case 3: return "Emergencia";
-            default: return "Desconocido";
-        }
+        return requestController.getAvailableNodes();
     }
     
     public void guardarDatos() {
-        requestController.guardarDatos();
+        requestController.saveData();
     }
     
     public void cargarDatos() {
-        requestController.cargarDatos();
+        requestController.loadData();
     }
 }

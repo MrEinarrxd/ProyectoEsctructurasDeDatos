@@ -23,15 +23,21 @@ public class GraphPanel extends JPanel {
         setPreferredSize(new Dimension(900, 600));
     }
 
+    /**
+     * Calcula las posiciones iniciales de los nodos del grafo.
+     * ALGORITMO:
+     * 1. Distribuye nodos en círculo (layout inicial)
+     * 2. Aplica algoritmo force-directed para optimizar visualización
+     */
     private void calcularPosiciones() {
-        Map<String, List<Edge>> mapa = grafo.obtenerMapaAristas();
+        Map<String, List<Edge>> mapa = grafo.getEdgeMap();
         
         // Si no hay nodos, no hacer nada
         if (mapa.isEmpty()) {
             return;
         }
         
-        // Obtener todos los nodos únicos
+        // Obtener todos los nodos únicos del grafo
         Set<String> nodos = new HashSet<>();
         for (String nodo : mapa.keySet()) {
             nodos.add(nodo);
@@ -40,7 +46,7 @@ public class GraphPanel extends JPanel {
             }
         }
         
-        // Inicializar posiciones en círculo
+        // Inicializar posiciones en círculo (distribución uniforme)
         int centerX = 450;
         int centerY = 300;
         int radius = 350;
@@ -55,15 +61,27 @@ public class GraphPanel extends JPanel {
             index++;
         }
         
-        // Aplicar algoritmo force-directed (spring layout) para mejorar la visualización
+        // Aplicar algoritmo force-directed (spring layout) para optimizar visualización
+        // Reduce cruces de aristas y mejora la estética del grafo
         aplicarForceDirectedLayout(mapa, nodos, 100);
     }
     
+    /**
+     * Aplica algoritmo Force-Directed Layout (Spring Layout) para optimizar posiciones.
+     * PRINCIPIO FÍSICO:
+     * - Nodos se repelen entre sí (como cargas eléctricas del mismo signo)
+     * - Aristas atraen sus nodos conectados (como resortes)
+     * - Sistema converge a equilibrio de fuerzas
+     * Esto minimiza cruces de aristas y distribuye nodos uniformemente.
+     * @param mapa Mapa de adyacencias del grafo
+     * @param nodos Conjunto de nodos del grafo
+     * @param iteraciones Número de iteraciones para convergencia
+     */
     private void aplicarForceDirectedLayout(Map<String, List<Edge>> mapa, Set<String> nodos, int iteraciones) {
         Map<String, double[]> velocidades = new HashMap<>();
         Map<String, double[]> fuerzas = new HashMap<>();
         
-        // Inicializar velocidades en cero
+        // Inicializar velocidades en cero para todos los nodos
         for (String nodo : nodos) {
             velocidades.put(nodo, new double[]{0, 0});
         }
@@ -156,7 +174,7 @@ public class GraphPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                            RenderingHints.VALUE_ANTIALIAS_ON);
 
-        Map<String, List<Edge>> mapa = grafo.obtenerMapaAristas();
+        Map<String, List<Edge>> mapa = grafo.getEdgeMap();
         Set<String> aristasDibujadas = new HashSet<>();
         Map<String, Integer> distancias = new HashMap<>();
         int pesoMaximo = 1;

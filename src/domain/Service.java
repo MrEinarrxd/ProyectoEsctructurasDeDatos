@@ -1,12 +1,12 @@
 package domain;
 
 public class Service {
-    static int counter = 1;
-    public int id;
-    public Request request;
-    public Vehicle vehicle;
-    public String route;
-    public double cost;
+    private static int counter = 1;
+    public final int id;
+    public final Request request;
+    public final Vehicle vehicle;
+    public final String route;
+    public final double cost;
     public String vehicleToClientRoute;
     public String clientToDestinationRoute;
     public String algorithmDetail;

@@ -55,10 +55,6 @@ public class RequestQueue {
         return front == null;
     }
     
-    public int size() {
-        return size;
-    }
-    
     public int getSize() {
         return size;
     }

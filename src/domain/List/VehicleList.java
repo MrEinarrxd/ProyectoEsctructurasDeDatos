@@ -10,10 +10,6 @@ public class VehicleList extends BaseLinkedList {
         super.add(vehiculo);
     }
     
-    public void agregar(Vehicle vehiculo) {
-        add(vehiculo);
-    }
-    
     public Vehicle get(int index) {
         Object obj = super.get(index);
         return (Vehicle) obj;
@@ -23,7 +19,7 @@ public class VehicleList extends BaseLinkedList {
         return super.contains(vehiculo);
     }
     
-    public List<Vehicle> obtenerTodos() {
+    public List<Vehicle> getAll() {
         List<Vehicle> lista = new ArrayList<>();
         Node current = head;
         while (current != null) {
@@ -33,11 +29,11 @@ public class VehicleList extends BaseLinkedList {
         return lista;
     }
     
-    public Vehicle buscarDisponible(String zona) {
+    public Vehicle findAvailable(String zone) {
         Node current = head;
         while (current != null) {
             Vehicle v = (Vehicle) current.data;
-            if (v.isAvailable() && v.getCurrentZone().equals(zona)) {
+            if (v.isAvailable() && v.getCurrentZone().equals(zone)) {
                 return v;
             }
             current = current.next;
