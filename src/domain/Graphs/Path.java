@@ -6,12 +6,13 @@ public class Path {
     public final int distance;
     public final StringList path;
     
-    // información adicional para resultados detallados
     public StringList camino;
     public int distanciaTotal;
     public String detalleAlgoritmo;
     
-    // Constructor original
+    /**
+     * Constructor with path and distance information
+     */
     public Path(int distance, StringList path) {
         this.distance = distance;
         this.path = path;
@@ -19,13 +20,14 @@ public class Path {
         this.distanciaTotal = distance;
         this.detalleAlgoritmo = "";
         
-        // Copiar el camino original al nuevo campo para detalles
         for (int i = 0; i < path.getSize(); i++) {
             this.camino.add(path.get(i));
         }
     }
     
-    // Constructor vacío
+    /**
+     * Empty constructor
+     */
     public Path() {
         this.distance = 0;
         this.path = new StringList();

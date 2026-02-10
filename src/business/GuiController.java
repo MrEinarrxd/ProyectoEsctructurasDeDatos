@@ -16,32 +16,32 @@ public class GuiController {
     }
 
     public Graph getMapa() {
-        return requestController.getMapa();
+        return requestController.getMap();
     }
 
     public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad) {
-        return requestController.registrarSolicitud(cliente, origen, destino, prioridad);
+        return requestController.registerRequest(cliente, origen, destino, prioridad);
     }
     
     public Request registrarSolicitud(String cliente, String origen, String destino, int prioridad, int categoria) {
-        return requestController.registrarSolicitud(cliente, origen, destino, prioridad, categoria);
+        return requestController.registerRequest(cliente, origen, destino, prioridad, categoria);
     }
 
     public Service procesarSiguienteServicio() {
-        return requestController.procesarSiguienteServicio();
+        return requestController.processNextService();
     }
 
     public VehicleList obtenerVehiculosOrdenadosQuickSort() {
-        return requestController.obtenerVehiculosOrdenadosQuickSort();
+        return requestController.getSortedVehiclesQuickSort();
     }
     
     public String explorarMapaBFS(String inicio) {
-        return requestController.explorarMapaBFS(inicio);
+        return requestController.exploreMapBFS(inicio);
     }
     
     public String obtenerColasReporte() {
-        RequestQueue colaUrgente = requestController.obtenerColaUrgente();
-        RequestQueue colaNormal = requestController.obtenerColaNormal();
+        RequestQueue colaUrgente = requestController.getUrgentQueue();
+        RequestQueue colaNormal = requestController.getNormalQueue();
         String resultado = "";
 
         resultado += "=== COLA DE SERVICIOS (PROCESADAS POR ÁRBOL DE TARIFAS) ===\n\n";
@@ -89,11 +89,11 @@ public class GuiController {
     }
 
     public ServiceList obtenerServiciosCompletados() {
-        return requestController.obtenerServiciosCompletados();
+        return requestController.getCompletedServices();
     }
     
     public StringList obtenerNodosDisponibles() {
-        return requestController.obtenerNodosDisponibles();
+        return requestController.getAvailableNodes();
     }
     
     private String obtenerNombreCategoria(int categoria) {
@@ -107,10 +107,14 @@ public class GuiController {
     }
     
     public void guardarDatos() {
-        requestController.guardarDatos();
+        requestController.saveData();
     }
     
     public void cargarDatos() {
-        requestController.cargarDatos();
+        requestController.loadData();
+    }
+    
+    public StringList obtenerHistorialEventos() {
+        return requestController.getHistory();
     }
 }

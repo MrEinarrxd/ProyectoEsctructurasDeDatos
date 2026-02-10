@@ -18,7 +18,6 @@ public class DataManager {
         }
     }
     
-    // Guardar vehículos
     public void guardarVehiculos(VehicleList vehiculos, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             for (Vehicle v : vehiculos.obtenerTodos()) {
@@ -39,7 +38,6 @@ public class DataManager {
                     String driverName = partes.length >= 5 ? partes[4] : "Driver";
                     String vehicleType = partes.length >= 6 ? partes[5] : "sedan";
                     Vehicle v = new Vehicle(partes[0], driverName, partes[1], vehicleType);
-                    // Establecer serviceCount usando incrementServiceCount varias veces
                     int serviceCount = Integer.parseInt(partes[2]);
                     for (int i = 0; i < serviceCount; i++) {
                         v.incrementServiceCount();
@@ -54,11 +52,10 @@ public class DataManager {
         return lista;
     }
     
-    // Guardar solicitudes
     public void guardarSolicitudes(domain.List.RequestQueue solicitudes, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             domain.List.RequestQueue queue = solicitudes.getAll();
-            for (int i = 0; i < queue.size(); i++) {
+            for (int i = 0; i < queue.getSize(); i++) {
                 Request s = queue.get(i);
                 writer.println(s.getId() + "," + s.getClientName() + "," + s.getOrigin() + "," + s.getDestination() + "," + s.getClientCategory());
             }
@@ -67,7 +64,6 @@ public class DataManager {
         }
     }
     
-    // Guardar servicios
     public void guardarServicios(domain.List.ServiceList servicios, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             domain.List.ServiceList serviceList = servicios.getAll();
@@ -80,7 +76,6 @@ public class DataManager {
         }
     }
     
-    // Guardar mapa (grafo)
     public void guardarMapa(Graph grafo, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             var mapa = grafo.obtenerMapaAristas();
@@ -95,7 +90,6 @@ public class DataManager {
         }
     }
     
-    // Cargar mapa (grafo)
     public void cargarMapa(Graph grafo, String archivo) {
         try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
             String linea;
@@ -116,7 +110,6 @@ public class DataManager {
         }
     }
     
-    // Métodos de conveniencia con nombres por defecto
     public void guardarTodo(Utils utils) {
         try (PrintWriter writer = new PrintWriter("vehiculos.txt")) {
             for (Vehicle v : utils.vehiculos.obtenerTodos()) {
@@ -136,7 +129,6 @@ public class DataManager {
         System.out.println("Datos cargados exitosamente");
     }
     
-    // Guardar historial
     public void guardarHistorial(StringList historialEventos, String archivo) {
         try (PrintWriter writer = new PrintWriter(archivo)) {
             for (int i = 0; i < historialEventos.getSize(); i++) {
@@ -147,7 +139,6 @@ public class DataManager {
         }
     }
     
-    // Cargar historial
     public StringList cargarHistorial(String archivo) {
         StringList lista = new StringList();
         try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
@@ -170,16 +161,13 @@ public class DataManager {
             while ((linea = reader.readLine()) != null) {
                 linea = linea.trim();
                 
-                // Ignorar líneas vacías
                 if (linea.isEmpty()) continue;
                 
-                // Detectar secciones
                 if (linea.startsWith("===")) {
                     seccion = linea.replace("===", "").trim();
                     continue;
                 }
                 
-                // Procesar según la sección
                 if (seccion.contains("VEHÍCULOS")) {
                     String[] partes = linea.split(",");
                     if (partes.length >= 4) {
