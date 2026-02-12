@@ -87,6 +87,10 @@ public class GuiController {
     public StringList getAvailableNodes() {
         return requestController.getAvailableNodes();
     }
+
+    public double getRate(String category) {
+        return requestController.getRate(category);
+    }
     
     public String getVehiclesReport() {
         VehicleList vehicles = getSortedVehiclesQuickSort();

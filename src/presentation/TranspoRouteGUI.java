@@ -363,9 +363,15 @@ public class TranspoRouteGUI extends JFrame {
 
         reporteArea.setText("=== ÁRBOL DE TARIFAS ===\n\n");
         reporteArea.append("Estructura de precios del sistema:\n");
-        reporteArea.append("  • Tarifa Básica: $10.00 por unidad de distancia\n");
-        reporteArea.append("  • Tarifa Premium: $15.00 por unidad de distancia\n");
-        reporteArea.append("  • Tarifa VIP: $25.00 por unidad de distancia\n\n");
+        double basica = controller.getRate("basica");
+        double premium = controller.getRate("premium");
+        double vip = controller.getRate("vip");
+        if (basica == 0.0) basica = 10.0;
+        if (premium == 0.0) premium = 15.0;
+        if (vip == 0.0) vip = 25.0;
+        reporteArea.append("  • Tarifa Básica: $" + String.format("%.2f", basica) + " por unidad de distancia\n");
+        reporteArea.append("  • Tarifa Premium: $" + String.format("%.2f", premium) + " por unidad de distancia\n");
+        reporteArea.append("  • Tarifa VIP: $" + String.format("%.2f", vip) + " por unidad de distancia\n\n");
 
         VehicleList vehiculos = controller.getSortedVehiclesQuickSort();
         reporteArea.append("=== VEHICULOS ORDENADOS (QUICKSORT) ===\n");

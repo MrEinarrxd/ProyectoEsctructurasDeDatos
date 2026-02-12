@@ -32,6 +32,10 @@ public class RequestController {
 		return utils.mapa;
 	}
 
+	public double getRate(String category) {
+		return utils.tarifas.search(category);
+	}
+
 	public Request registerRequest(String client, String origin, String destination, int priority) {
 		return registerRequest(client, origin, destination, priority, 1);
 	}
