@@ -22,7 +22,7 @@ Noroeste,Suroeste,16
 Norte,Este,14
 
 === TARIFAS ===
-basica,11.0
+basica,10.0
 premium,15.0
 vip,25.0
 

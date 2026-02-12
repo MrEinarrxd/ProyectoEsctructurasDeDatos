@@ -38,6 +38,7 @@ public class GraphPanel extends JPanel {
         this.mapaAristas = controller.getMap().getEdgeMap();
         calcularPosiciones();
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        
     }
 
     private void calcularPosiciones() {
