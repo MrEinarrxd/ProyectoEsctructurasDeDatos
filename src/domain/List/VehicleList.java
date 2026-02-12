@@ -27,7 +27,7 @@ public class VehicleList extends BaseLinkedList {
         return super.contains(vehiculo);
     }
 
-    public VehicleList obtenerTodos() {
+    public VehicleList getAll() {
         VehicleList lista = new VehicleList();
         Node current = head;
         while (current != null) {
@@ -38,12 +38,25 @@ public class VehicleList extends BaseLinkedList {
         return lista;
     }
     
-    public Vehicle buscarDisponible(String zona) {
+    public Vehicle findAvailable(String zone) {
         Node current = head;
         while (current != null) {
             VehicleNode vehicleNode = (VehicleNode) current;
             Vehicle v = vehicleNode.getVehicle();
-            if (v.isAvailable() && v.getCurrentZone().equals(zona)) {
+            if (v.isAvailable() && v.getCurrentZone().equals(zone)) {
+                return v;
+            }
+            current = current.next;
+        }
+        return null;
+    }
+
+    public Vehicle findById(String id) {
+        Node current = head;
+        while (current != null) {
+            VehicleNode vehicleNode = (VehicleNode) current;
+            Vehicle v = vehicleNode.getVehicle();
+            if (v.getId().equals(id)) {
                 return v;
             }
             current = current.next;

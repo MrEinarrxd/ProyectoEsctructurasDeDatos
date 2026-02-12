@@ -65,7 +65,7 @@ public class TranspoRouteGUI extends JFrame {
         tabbedPane.addTab("Nueva Solicitud", crearPanelSolicitud());
         tabbedPane.addTab("Procesar", crearPanelProcesar());
 
-        graphPanel = new GraphPanel(controller.getMap());
+        graphPanel = new GraphPanel(controller);
         JScrollPane mapScroll = new JScrollPane(graphPanel, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

@@ -13,7 +13,7 @@ public class DataManager {
     
     public void saveVehicles(VehicleList vehicles, String file) {
         try (PrintWriter writer = new PrintWriter(file)) {
-            VehicleList allVehicles = vehicles.obtenerTodos();
+            VehicleList allVehicles = vehicles.getAll();
             for (int i = 0; i < allVehicles.getSize(); i++) {
                 Vehicle v = allVehicles.get(i);
                 writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
@@ -73,7 +73,7 @@ public class DataManager {
     
     public void saveMap(Graph graph, String file) {
         try (PrintWriter writer = new PrintWriter(file)) {
-            var map = graph.obtenerMapaAristas();
+            var map = graph.getEdgeMap();
             for (var entry : map.entrySet()) {
                 String origin = entry.getKey();
                 for (Edge edge : entry.getValue()) {
@@ -107,7 +107,7 @@ public class DataManager {
     
     public void saveAll(Utils utils) {
         try (PrintWriter writer = new PrintWriter("vehiculos.txt")) {
-            VehicleList allVehicles = utils.vehiculos.obtenerTodos();
+            VehicleList allVehicles = utils.vehiculos.getAll();
             for (int i = 0; i < allVehicles.getSize(); i++) {
                 Vehicle v = allVehicles.get(i);
                 writer.println(v.getId() + "," + v.getCurrentZone() + "," + v.getServiceCount() + "," + v.isAvailable() + "," + v.getDriverName() + "," + v.getVehicleType());
@@ -120,7 +120,7 @@ public class DataManager {
     
     public void loadAll(Utils utils) {
         VehicleList vehicles = loadVehicles("vehiculos.txt");
-        VehicleList allVehicles = vehicles.obtenerTodos();
+        VehicleList allVehicles = vehicles.getAll();
         for (int i = 0; i < allVehicles.getSize(); i++) {
             Vehicle v = allVehicles.get(i);
             utils.vehiculos.add(v);

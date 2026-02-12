@@ -26,6 +26,27 @@ public class RequestController {
 
 	private void initData() {
 		dataManager.loadInitialData(utils, "datos_iniciales.txt");
+		assignVehiclesToLoadedRequests();
+	}
+
+	private void assignVehiclesToLoadedRequests() {
+		// Asignar vehículos a solicitudes en cola urgente
+		RequestQueue urgentAll = utils.colaUrgente.getAll();
+		for (int i = 0; i < urgentAll.getSize(); i++) {
+			Request req = urgentAll.get(i);
+			if (req.getAssignedVehicleId() == null) {
+				assignVehicleToRequest(req);
+			}
+		}
+		
+		// Asignar vehículos a solicitudes en cola normal
+		RequestQueue normalAll = utils.colaNormal.getAll();
+		for (int i = 0; i < normalAll.getSize(); i++) {
+			Request req = normalAll.get(i);
+			if (req.getAssignedVehicleId() == null) {
+				assignVehicleToRequest(req);
+			}
+		}
 	}
 
 	public Graph getMap() {
@@ -96,7 +117,7 @@ public class RequestController {
 	
 	public StringList getAvailableNodes() {
 		StringList nodes = new StringList();
-		var map = utils.mapa.obtenerMapaAristas();
+		var map = utils.mapa.getEdgeMap();
 		for (String node : map.keySet()) {
 			nodes.add(node);
 		}
@@ -129,6 +150,9 @@ public class RequestController {
 
 
 	private void addRequest(Request r) {
+		// Asignar vehículo disponible a la solicitud
+		assignVehicleToRequest(r);
+		
 		if (r.getClientCategory() == 3) {
 			utils.colaUrgente.enqueue(r, 4);
 			utils.historialEventos.push("EMERGENCIA: " + r.getClientName() + " de " + r.getOrigin() + " a " + r.getDestination());
@@ -136,6 +160,18 @@ public class RequestController {
 			utils.colaNormal.enqueue(r);
 			String category = Utils.getCategoryName(r.getClientCategory());
 			utils.historialEventos.push(category.toUpperCase() + ": " + r.getClientName() + " de " + r.getOrigin() + " a " + r.getDestination());
+		}
+	}
+
+	private void assignVehicleToRequest(Request request) {
+		// Busca vehículo disponible en la zona de origen, si no hay busca cualquier disponible
+		Vehicle vehicle = assignVehicleGreedy(request.getOrigin());
+		if (vehicle != null) {
+			request.setAssignedVehicleId(vehicle.getId());
+			vehicle.setAvailable(false);
+			utils.historialEventos.push("Vehículo " + vehicle.getId() + " asignado a solicitud " + request.getId());
+		} else {
+			utils.historialEventos.push("ADVERTENCIA: No hay vehículos disponibles para solicitud " + request.getId());
 		}
 	}
 
@@ -159,9 +195,12 @@ public class RequestController {
 			return null;
 		}
 
-		Vehicle vehicle = assignVehicleGreedy(request.getOrigin());
+		// Obtener vehículo asignado previamente en registerRequest/loadInitialData
+		String vehicleId = request.getAssignedVehicleId();
+		Vehicle vehicle = vehicleId != null ? utils.vehiculos.findById(vehicleId) : null;
+		
 		if (vehicle == null) {
-			utils.historialEventos.push("ERROR: No hay vehiculos para " + request.getOrigin());
+			utils.historialEventos.push("ERROR: Vehículo asignado no encontrado para solicitud " + request.getId());
 			return null;
 		}
 
@@ -184,12 +223,15 @@ public class RequestController {
 		utils.servicios.add(service);
 		utils.historialEventos.push("SERVICIO #" + service.id + " creado: $" + cost);
 
+		// Marcar vehículo como disponible nuevamente
 		vehicle.setAvailable(true);
+		utils.historialEventos.push("Vehículo " + vehicle.getId() + " disponible nuevamente");
+		
 		return service;
 	}
 
 	private Vehicle assignVehicleGreedy(String zone) {
-		Vehicle v = utils.vehiculos.buscarDisponible(zone);
+		Vehicle v = utils.vehiculos.findAvailable(zone);
 		if (v != null) return v;
 
 		int size = utils.vehiculos.getSize();

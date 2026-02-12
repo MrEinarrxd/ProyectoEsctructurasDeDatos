@@ -192,7 +192,7 @@ public class Graph {
         return new Path(distance[targetIndex], path);
     }
 
-    public Map<String, List<Edge>> obtenerMapaAristas() {
+    public Map<String, List<Edge>> getEdgeMap() {
         Map<String, List<Edge>> mapa = new HashMap<>();
         for (int i = 0; i < nodes.getSize(); i++) {
             GraphNode node = nodes.get(i);

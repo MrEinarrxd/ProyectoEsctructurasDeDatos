@@ -9,8 +9,8 @@ import java.util.HashSet;
 
 import javax.swing.*;
 
+import business.GuiController;
 import domain.Graphs.Edge;
-import domain.Graphs.Graph;
 
 public class GraphPanel extends JPanel {
     // Constantes de layout
@@ -30,10 +30,12 @@ public class GraphPanel extends JPanel {
 
     private Map<String, Point> posiciones;
     private Map<String, List<Edge>> mapaAristas;
+    private GuiController controller;
 
-    public GraphPanel(Graph grafo) {
+    public GraphPanel(GuiController controller) {
+        this.controller = controller;
         this.posiciones = new HashMap<>();
-        this.mapaAristas = grafo.obtenerMapaAristas();
+        this.mapaAristas = controller.getMap().getEdgeMap();
         calcularPosiciones();
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
     }
