@@ -30,6 +30,7 @@ public class GraphPanel extends JPanel {
 
     private Map<String, Point> posiciones;
     private Map<String, List<Edge>> mapaAristas;
+    @SuppressWarnings("unused")
     private GuiController controller;
 
     public GraphPanel(GuiController controller) {
